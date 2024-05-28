@@ -9,6 +9,11 @@
 #include <dxcapi.h>
 #include <cmath>
 
+#include "externals/imgui/imgui.h"
+#include "externals/imgui/imgui_impl_dx12.h"
+#include "externals/imgui/imgui_impl_win32.h"
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 #pragma comment(lib,"dxguid.lib")
@@ -248,6 +253,9 @@ ID3D12Resource* CreateBufferResource(ID3D12Device* device, size_t sizeInBytes) {
 
 #pragma region ウィンドウプロシージャ
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) {
+		return true;
+	}
 	switch (msg) {
 	case WM_DESTROY:
 		PostQuitMessage(0);
@@ -369,6 +377,23 @@ Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f } };
 #pragma region cameraTransform変数
 Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
 #pragma endregion
+
+
+#pragma region DescriptorHeapの作成関数
+ID3D12DescriptorHeap* CreateDescriptorHeap(
+	ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible)
+{
+	ID3D12DescriptorHeap* descriptorHeap = nullptr;
+	D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc{};
+	descriptorHeapDesc.Type = heapType;
+	descriptorHeapDesc.NumDescriptors = numDescriptors;
+	descriptorHeapDesc.Flags = shaderVisible ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	HRESULT hr = device->CreateDescriptorHeap(&descriptorHeapDesc, IID_PPV_ARGS(&descriptorHeap));
+	assert(SUCCEEDED(hr));
+	return descriptorHeap;
+}
+#pragma endregion
+
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
@@ -543,12 +568,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 #pragma region DescriptorHeapの生成
-	ID3D12DescriptorHeap* rtvDescriptorHeap = nullptr;
-	D3D12_DESCRIPTOR_HEAP_DESC rtvDescriptorHeapDesc{};
-	rtvDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-	rtvDescriptorHeapDesc.NumDescriptors = 2;
-	hr = device->CreateDescriptorHeap(&rtvDescriptorHeapDesc, IID_PPV_ARGS(&rtvDescriptorHeap));
+	// ディスクリプタヒープの生成
+	// RTV用のヒープでディスクリプタの数は2。RTVはShader内で読むものではないので、ShaderVisibleはfalse
+	ID3D12DescriptorHeap* rtvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
+	// SRV用のヒープでディスクリプタの数は128。SRVはShader内で読むものなので、ShaderVisibleはtrue
+	ID3D12DescriptorHeap* srvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
 
+	// ディスクリプタヒープが作れなかったので起動できない
 	assert(SUCCEEDED(hr));
 #pragma endregion
 
@@ -759,6 +785,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	scissorRect.bottom = kClientHeight;
 #pragma endregion
 
+#pragma region imGuiの初期化
+	// ImGuiの初期化。詳細はとても重要ではないので解説は省略する。
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui::StyleColorsDark();
+	ImGui_ImplWin32_Init(hwnd);
+	ImGui_ImplDX12_Init(device,
+		swapChainDesc.BufferCount,
+		rtvDesc.Format,
+		srvDescriptorHeap,
+		srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+		srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+
+#pragma endregion
+
 	//文字出力
 	OutputDebugStringA("Hello,DirectX!\n");
 
@@ -780,6 +821,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 worldProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 			*transformationMatrixData = worldProjectionMatrix;
 #pragma endregion
+
+			ImGui_ImplDX12_NewFrame();
+			ImGui_ImplWin32_NewFrame();
+			ImGui::NewFrame();
+			ImGui::ShowDemoWindow();
+			ImGui::Render();
 
 #pragma region コマンドを積み込み確定させる
 			UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
@@ -804,6 +851,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
 			commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
+
+			//描画用のDescriptHeap
+			ID3D12DescriptorHeap* descriptorHepes[] = { srvDescriptorHeap };
+			commandList->SetDescriptorHeaps(1, descriptorHepes);
+			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
 
 #pragma region コマンドを積む
 			commandList->RSSetViewports(1, &viewport);
@@ -871,6 +923,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::string str1{ std::to_string(10) };
 
 #pragma region 解放処理
+	ImGui_ImplDX12_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
 	materialResource->Release();
 	vertexResource->Release();
 	graphicsPipelineState->Release();
