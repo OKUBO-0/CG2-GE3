@@ -825,7 +825,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
-			ImGui::ShowDemoWindow();
+			ImGui::Begin("SetColor");
+			ImGui::ColorEdit4("*materialData", &materialData->x);
+			ImGui::End();
 			ImGui::Render();
 
 #pragma region コマンドを積み込み確定させる
