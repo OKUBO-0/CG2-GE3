@@ -826,7 +826,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
 			ImGui::Begin("SetColor");
-			ImGui::ColorEdit4("*materialData", &materialData->x);
+			ImGui::ColorEdit4("materialData", &materialData->x);
 			ImGui::End();
 			ImGui::Render();
 
