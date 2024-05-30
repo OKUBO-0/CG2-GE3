@@ -813,7 +813,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		else {
 			//ゲームの処理
 #pragma region Transformを使ってCBufferを更新する
-			transform.rotate.y += 0.03f;
+			//transform.rotate.y += 0.03f;
 			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 			Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 			Matrix4x4 viewMatrix = Inverse(cameraMatrix);
@@ -825,8 +825,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
-			ImGui::Begin("SetColor");
-			ImGui::ColorEdit4("materialData", &materialData->x);
+			ImGui::Begin("Settings");
+
+			// Color Edit ウィンドウ
+			if (ImGui::CollapsingHeader("SetColor")) {
+				ImGui::ColorEdit4("materialData", &materialData->x);
+			}
+			ImGui::Separator();
+
+			// Translation ウィンドウ
+			if (ImGui::CollapsingHeader("Object")) {
+				ImGui::DragFloat3("Translation", &transform.translate.x, 0.01f);
+				ImGui::DragFloat3("Rotation", &transform.rotate.x, 0.01f);
+				ImGui::DragFloat2("Scale", &transform.scale.x, 0.01f);
+				if (ImGui::Button("Reset Transform")) {
+					transform = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
+				}
+			}
+			ImGui::Separator();
+
 			ImGui::End();
 			ImGui::Render();
 
