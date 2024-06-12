@@ -181,3 +181,19 @@ Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspectRatio, float nearClip
 	return result;
 }
 #pragma endregion
+
+#pragma region 平行投影行列
+Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip) {
+
+	Matrix4x4 result;
+
+	result = {
+	2 / (right - left),0.0f,0.0f,0.0f,
+	0.0f,2 / (top - bottom),0.0f,0.0f,
+	0.0f,0.0f,1 / (farClip - nearClip),0.0f,
+	(left + right) / (left - right),(top + bottom) / (bottom - top),nearClip / (nearClip - farClip),1.0f
+	};
+
+	return result;
+}
+#pragma endregion

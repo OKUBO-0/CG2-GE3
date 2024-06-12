@@ -184,6 +184,10 @@ Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f } };
 Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
 #pragma endregion
 
+#pragma region spriteTransform変数
+Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
+#pragma endregion
+
 
 #pragma region DescriptorHeapの作成関数
 ID3D12DescriptorHeap* CreateDescriptorHeap(
@@ -694,22 +698,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region Material用のResourceを作る
 	ID3D12Resource* materialResource = CreateBufferResource(device, sizeof(Vector4));
-
 	Vector4* materialData = nullptr;
-
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
-
 	*materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 #pragma endregion
 
 #pragma region TransformationMatrix用のResourceを作る
 	ID3D12Resource* transformationMatrixResource = CreateBufferResource(device, sizeof(Matrix4x4));
-
 	Matrix4x4* transformationMatrixData = nullptr;
-
 	transformationMatrixResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData));
-
 	*transformationMatrixData = MakeIdentity4x4();
+#pragma endregion
+
+#pragma region TransfomationMatrixSprite用のResourceを作る
+	// Sprite用のTransfomationMatrix用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
+	ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(Matrix4x4));
+	// データを書き込む
+	Matrix4x4* transformationMatrixDataSprite = nullptr;
+	// 書き込むためのアドレスを取得
+	transformationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSprite));
+	// 単位行列を書き込んでおく
+	*transformationMatrixDataSprite = MakeIdentity4x4();
+#pragma endregion
+
+#pragma region VertexBufferResourceを生成
+	ID3D12Resource* vertexResourceSprite = CreateBufferResource(device, sizeof(VertexData) * 6);
 #pragma endregion
 
 #pragma region DSV
@@ -756,6 +769,33 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexData[5].position = { 0.5f,-0.5f,-0.5f,1.0f };
 	vertexData[5].texcoord = { 1.0f,1.0f };
 
+
+	// 頂点バッファーを作成する
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{ };
+	// リソースの先頭のアドレスから使う
+	vertexBufferViewSprite.BufferLocation = vertexResourceSprite->GetGPUVirtualAddress();
+	// 使用するリソースのサイズは頂点6つ分のサイズ
+	vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 6;
+	// 1頂点当たりのサイズ
+	vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
+
+	VertexData* vertexDataSprite = nullptr;
+	vertexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
+	// 1枚目の三角形
+	vertexDataSprite[0].position = { 0.0f,360.0f,0.0f,1.0f };//左した
+	vertexDataSprite[0].texcoord = { 0.0f,1.0f };
+	vertexDataSprite[1].position = { 0.0f,0.0f,0.0f,1.0f };//左上
+	vertexDataSprite[1].texcoord = { 0.0f,0.0f };
+	vertexDataSprite[2].position = { 640.0f,360.0f,0.0f,1.0f };//右下
+	vertexDataSprite[2].texcoord = { 1.0f,1.0f };
+	// 2枚目の三角形
+	vertexDataSprite[3].position = { 0.0f,0.0f,0.0f,1.0f };//左した
+	vertexDataSprite[3].texcoord = { 0.0f,0.0f };
+	vertexDataSprite[4].position = { 640.0f,0.0f,0.0f,1.0f };//右上
+	vertexDataSprite[4].texcoord = { 1.0f,0.0f };
+	vertexDataSprite[5].position = { 640.0f,360.0f,0.0f,1.0f };//右下
+	vertexDataSprite[5].texcoord = { 1.0f,1.0f };
+
 #pragma endregion
 
 #pragma region ビューポート
@@ -779,7 +819,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 #pragma region Texturを読む
-	// Texturを読んで転送する
+	// Textureを読んで転送する
 	DirectX::ScratchImage mipImages = LoadTexture("Resources/uvChecker.png");
 	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
 	ID3D12Resource* textureResource = CreateTextureResource(device, metadata);
@@ -840,6 +880,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			*transformationMatrixData = worldProjectionMatrix;
 #pragma endregion
 
+#pragma region WVPMatrixを作って書き込む
+			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
+			Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
+			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(kClientWidth), float(kClientHeight), 0.0f, 100.0f);
+			Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
+			*transformationMatrixDataSprite = worldViewProjectionMatrixSprite;
+#pragma endregion
+
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
@@ -851,8 +899,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}
 			ImGui::Separator();
 
-			// Translation ウィンドウ
-			if (ImGui::CollapsingHeader("Object")) {
+			// 三角形Translation ウィンドウ
+			if (ImGui::CollapsingHeader("3DObject")) {
 				ImGui::DragFloat3("Translation", &transform.translate.x, 0.01f);
 				ImGui::DragFloat3("Rotation", &transform.rotate.x, 0.01f);
 				ImGui::DragFloat2("Scale", &transform.scale.x, 0.01f);
@@ -861,6 +909,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				}
 			}
 			ImGui::Separator();
+
+			// 2DSprite ウィンドウ
+			if (ImGui::CollapsingHeader("2DSprite")) {
+				ImGui::DragFloat3("TranslationSprite", &transformSprite.translate.x);
+				ImGui::DragFloat3("RotationSprite", &transformSprite.rotate.y, 0.1f);
+				ImGui::DragFloat2("ScaleSprite", &transformSprite.scale.x, 0.1f);
+				if (ImGui::Button("Reset Transform")) {
+					transformSprite = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
+				}
+			}
+			ImGui::Separator();
+
 			ImGui::End();
 			ImGui::Render();
 
@@ -913,7 +973,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 #pragma endregion
+
 			// 描画!
+			commandList->DrawInstanced(6, 1, 0, 0);
+#pragma endregion
+
+#pragma region Spriteの描画
+			// sprite用の描画。変更が必要なものだけ変更する
+			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
+			// TransFormationMatrixBufferの場所を設定
+			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
+			// 描画！ (DrawCall/ドローコール)
 			commandList->DrawInstanced(6, 1, 0, 0);
 #pragma endregion
 
