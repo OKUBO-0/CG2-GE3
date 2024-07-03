@@ -1,44 +1,21 @@
 #pragma once
-#include "Matrix4x4.h"
-#include "Vector4.h"
-#include "Vector3.h"
 #include "Vector2.h"
-#include <assert.h>
+#include "Vector3.h"
+#include "Vector4.h"
+#include "Matrix4x4.h"
 #include <cmath>
-#include <stdio.h>
 
 float Cot(float theta);
 
 struct VertexData {
 	Vector4 position;
 	Vector2 texcoord;
-	Vector3 normal;
 };
 
 struct Transform {
 	Vector3 scale;
 	Vector3 rotate;
 	Vector3 translate;
-};
-
-struct Material {
-
-	Vector4 color;
-	int32_t enableLighting;
-};
-
-struct TransformationMatrix
-{
-	Matrix4x4 WVP;
-	Matrix4x4 World;
-
-};
-
-struct DirectionalLight {
-
-	Vector4 color;
-	Vector3 direction;
-	float intensity;
 };
 
 Matrix4x4 MakeIdentity4x4();
