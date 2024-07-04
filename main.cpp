@@ -945,14 +945,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 
-	//平行光源用のResoureceを作成
+#pragma region 平行光源用のResoureceを作る
 	ID3D12Resource* directionalLightResource = CreateBufferResource(device, sizeof(DirectionalLight));
 	DirectionalLight* directionalLightData = nullptr;
 	directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData));
 	directionalLightData->color = { 1.0f,1.0f,1.0f,1.0f };
 	directionalLightData->direction = { 0.0f,-1.0f,1.0f };
 	directionalLightData->intensity = 1.0f;
-
+#pragma endregion
 
 
 
