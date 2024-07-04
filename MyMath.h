@@ -15,30 +15,26 @@ struct VertexData {
 	Vector3 normal;
 };
 
-struct Transform {
-	Vector3 scale;
-	Vector3 rotate;
-	Vector3 translate;
-};
-
 struct Material {
-
 	Vector4 color;
 	int32_t enableLighting;
 };
 
-struct TransformationMatrix
-{
+struct TransformationMatrix {
 	Matrix4x4 WVP;
 	Matrix4x4 World;
-
 };
 
 struct DirectionalLight {
-
 	Vector4 color;
 	Vector3 direction;
 	float intensity;
+};
+
+struct Transform {
+	Vector3 scale;
+	Vector3 rotate;
+	Vector3 translate;
 };
 
 Matrix4x4 MakeIdentity4x4();
