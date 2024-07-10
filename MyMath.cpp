@@ -237,3 +237,138 @@ Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, f
 
 }
 #pragma endregion
+
+Matrix4x4 MakeScaleMatrix(const Vector3& scale)
+{
+	Matrix4x4 ans;
+
+	ans.m[0][0] = scale.x;
+	ans.m[0][1] = 0;
+	ans.m[0][2] = 0;
+	ans.m[0][3] = 0;
+
+	ans.m[1][0] = 0;
+	ans.m[1][1] = scale.y;
+	ans.m[1][2] = 0;
+	ans.m[1][3] = 0;
+
+	ans.m[2][0] = 0;
+	ans.m[2][1] = 0;
+	ans.m[2][2] = scale.z;
+	ans.m[2][3] = 0;
+
+	ans.m[3][0] = 0;
+	ans.m[3][1] = 0;
+	ans.m[3][2] = 0;
+	ans.m[3][3] = 1;
+	return ans;
+}
+
+Matrix4x4 MakeRotateXMatrix(float radian)
+{
+	Matrix4x4 ans;
+
+	ans.m[0][0] = 1;
+	ans.m[0][1] = 0;
+	ans.m[0][2] = 0;
+	ans.m[0][3] = 0;
+
+	ans.m[1][0] = 0;
+	ans.m[1][1] = std::cos(radian);;
+	ans.m[1][2] = std::sin(radian);;
+	ans.m[1][3] = 0;
+
+	ans.m[2][0] = 0;
+	ans.m[2][1] = -std::sin(radian);;
+	ans.m[2][2] = std::cos(radian);;
+	ans.m[2][3] = 0;
+
+	ans.m[3][0] = 0;
+	ans.m[3][1] = 0;
+	ans.m[3][2] = 0;
+	ans.m[3][3] = 1;
+
+	return ans;
+}
+
+Matrix4x4 MakeRotateYMatrix(float radian)
+{
+	Matrix4x4 ans;
+
+	ans.m[0][0] = std::cos(radian);
+	ans.m[0][1] = 0;
+	ans.m[0][2] = -std::sin(radian);
+	ans.m[0][3] = 0;
+
+	ans.m[1][0] = 0;
+	ans.m[1][1] = 1;
+	ans.m[1][2] = 0;
+	ans.m[1][3] = 0;
+
+	ans.m[2][0] = std::sin(radian);;
+	ans.m[2][1] = 0;
+	ans.m[2][2] = std::cos(radian);;
+	ans.m[2][3] = 0;
+
+	ans.m[3][0] = 0;
+	ans.m[3][1] = 0;
+	ans.m[3][2] = 0;
+	ans.m[3][3] = 1;
+
+	return ans;
+}
+
+Matrix4x4 MakeRotateZMatrix(float radian)
+{
+	Matrix4x4 ans;
+
+	ans.m[0][0] = std::cos(radian);
+	ans.m[0][1] = std::sin(radian);
+	ans.m[0][2] = 0;
+	ans.m[0][3] = 0;
+
+	ans.m[1][0] = -std::sin(radian);
+	ans.m[1][1] = std::cos(radian);
+	ans.m[1][2] = 0;
+	ans.m[1][3] = 0;
+
+	ans.m[2][0] = 0;
+	ans.m[2][1] = 0;
+	ans.m[2][2] = 1;
+	ans.m[2][3] = 0;
+
+	ans.m[3][0] = 0;
+	ans.m[3][1] = 0;
+	ans.m[3][2] = 0;
+	ans.m[3][3] = 1;
+
+
+	return ans;
+}
+
+Matrix4x4 MakeTranslateMatrix(const Vector3& translate)
+{
+	Matrix4x4 ans;
+
+	ans.m[0][0] = 1;
+	ans.m[0][1] = 0;
+	ans.m[0][2] = 0;
+	ans.m[0][3] = 0;
+
+	ans.m[1][0] = 0;
+	ans.m[1][1] = 1;
+	ans.m[1][2] = 0;
+	ans.m[1][3] = 0;
+
+	ans.m[2][0] = 0;
+	ans.m[2][1] = 0;
+	ans.m[2][2] = 1;
+	ans.m[2][3] = 0;
+
+	ans.m[3][0] = translate.x;
+	ans.m[3][1] = translate.y;
+	ans.m[3][2] = translate.z;
+	ans.m[3][3] = 1;
+
+	return ans;
+}
