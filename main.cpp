@@ -1110,7 +1110,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// UVTransform
 			if (ImGui::CollapsingHeader("UVTransform")) {
 				ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
-				ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
+				ImGui::DragFloat3("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 				ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
 			}
 			ImGui::Separator();
