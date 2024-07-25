@@ -7,6 +7,8 @@
 #include <assert.h>
 #include <cmath>
 #include <stdio.h>
+#include <vector>
+#include <string>
 
 float Cot(float theta);
 
@@ -38,6 +40,10 @@ struct Transform {
 	Vector3 scale;
 	Vector3 rotate;
 	Vector3 translate;
+};
+
+struct ModelData {
+	std::vector<VertexData>vertices;
 };
 
 Matrix4x4 MakeIdentity4x4();
