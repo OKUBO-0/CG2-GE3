@@ -355,7 +355,7 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 				Vector4 position = positions[elementIndices[0] - 1];
 				Vector2 texcoord = texcoords[elementIndices[1] - 1];
 				Vector3 normal = normals[elementIndices[2] - 1];
-				VertexData vertex = { position,texcoord,normal };
+				VertexData vertex = { position, texcoord, normal };
 				modelData.vertices.push_back(vertex);
 			}
 		}
@@ -797,7 +797,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region vertexResource頂点バッファーを作成
 	// モデル読み込み	
-	ModelData modelData = LoadObjFile("resources", "plane.obj");
+	ModelData modelData = LoadObjFile("resources", "axis.obj");
 	// 頂点リソースを作る
 	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
 	// 頂点バッファービューを作成する
@@ -814,84 +814,84 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 #pragma region 基準点
-	//経度分割1つ分の経度φd
-	const float kLonEvery = 2 * std::numbers::pi_v<float> / (float)kSubdivision;
-	//緯度分割１つ分の緯度Θd
-	const float kLatEvery = std::numbers::pi_v<float> / (float)kSubdivision;
-	//緯度方向に分割しながら線を描く
-	const float w = 2.0f;
-	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
-		float lat = -std::numbers::pi_v<float> / 2.0f + kLatEvery * latIndex;//θ
-		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
-			//テクスチャ用のTexcood
+	////経度分割1つ分の経度φd
+	//const float kLonEvery = 2 * std::numbers::pi_v<float> / (float)kSubdivision;
+	////緯度分割１つ分の緯度Θd
+	//const float kLatEvery = std::numbers::pi_v<float> / (float)kSubdivision;
+	////緯度方向に分割しながら線を描く
+	//const float w = 2.0f;
+	//for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
+	//	float lat = -std::numbers::pi_v<float> / 2.0f + kLatEvery * latIndex;//θ
+	//	for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
+	//		//テクスチャ用のTexcood
 
-			//書き込む最初の場所
-			uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
-			float lon = lonIndex * kLonEvery;
-			//基準点a
-			vertexData[start].position.x = std::cosf(lat) * std::cosf(lon);
-			vertexData[start].position.y = std::sinf(lat);
-			vertexData[start].position.z = std::cosf(lat) * std::sinf(lon);
-			vertexData[start].position.w = w;
-			vertexData[start].normal.x = vertexData[start].position.x;
-			vertexData[start].normal.y = vertexData[start].position.y;
-			vertexData[start].normal.z = vertexData[start].position.z;
-			vertexData[start].texcoord = { float(lonIndex) / float(kSubdivision), 1.0f - float(latIndex) / float(kSubdivision) };
-			//基準点b
-			start++;
-			vertexData[start].position.x = std::cosf(lat + kLatEvery) * std::cosf(lon);
-			vertexData[start].position.y = std::sinf(lat + kLatEvery);
-			vertexData[start].position.z = std::cosf(lat + kLatEvery) * std::sinf(lon);
-			vertexData[start].position.w = w;
-			vertexData[start].normal.x = vertexData[start].position.x;
-			vertexData[start].normal.y = vertexData[start].position.y;
-			vertexData[start].normal.z = vertexData[start].position.z;
-			vertexData[start].texcoord = { float(lonIndex) / float(kSubdivision), 1.0f - float(latIndex + 1.0f) / float(kSubdivision) };
-			//基準点c
-			start++;
-			vertexData[start].position.x = std::cosf(lat) * std::cosf(lon + kLonEvery);
-			vertexData[start].position.y = std::sinf(lat);
-			vertexData[start].position.z = std::cosf(lat) * std::sinf(lon + kLonEvery);
-			vertexData[start].position.w = w;
-			vertexData[start].normal.x = vertexData[start].position.x;
-			vertexData[start].normal.y = vertexData[start].position.y;
-			vertexData[start].normal.z = vertexData[start].position.z;
-			vertexData[start].texcoord = { float(lonIndex + 1.0f) / float(kSubdivision), 1.0f - float(latIndex) / float(kSubdivision) };
+	//		//書き込む最初の場所
+	//		uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
+	//		float lon = lonIndex * kLonEvery;
+	//		//基準点a
+	//		vertexData[start].position.x = std::cosf(lat) * std::cosf(lon);
+	//		vertexData[start].position.y = std::sinf(lat);
+	//		vertexData[start].position.z = std::cosf(lat) * std::sinf(lon);
+	//		vertexData[start].position.w = w;
+	//		vertexData[start].normal.x = vertexData[start].position.x;
+	//		vertexData[start].normal.y = vertexData[start].position.y;
+	//		vertexData[start].normal.z = vertexData[start].position.z;
+	//		vertexData[start].texcoord = { float(lonIndex) / float(kSubdivision), 1.0f - float(latIndex) / float(kSubdivision) };
+	//		//基準点b
+	//		start++;
+	//		vertexData[start].position.x = std::cosf(lat + kLatEvery) * std::cosf(lon);
+	//		vertexData[start].position.y = std::sinf(lat + kLatEvery);
+	//		vertexData[start].position.z = std::cosf(lat + kLatEvery) * std::sinf(lon);
+	//		vertexData[start].position.w = w;
+	//		vertexData[start].normal.x = vertexData[start].position.x;
+	//		vertexData[start].normal.y = vertexData[start].position.y;
+	//		vertexData[start].normal.z = vertexData[start].position.z;
+	//		vertexData[start].texcoord = { float(lonIndex) / float(kSubdivision), 1.0f - float(latIndex + 1.0f) / float(kSubdivision) };
+	//		//基準点c
+	//		start++;
+	//		vertexData[start].position.x = std::cosf(lat) * std::cosf(lon + kLonEvery);
+	//		vertexData[start].position.y = std::sinf(lat);
+	//		vertexData[start].position.z = std::cosf(lat) * std::sinf(lon + kLonEvery);
+	//		vertexData[start].position.w = w;
+	//		vertexData[start].normal.x = vertexData[start].position.x;
+	//		vertexData[start].normal.y = vertexData[start].position.y;
+	//		vertexData[start].normal.z = vertexData[start].position.z;
+	//		vertexData[start].texcoord = { float(lonIndex + 1.0f) / float(kSubdivision), 1.0f - float(latIndex) / float(kSubdivision) };
 
-			//基準点c
-			start++;
-			vertexData[start].position.x = std::cosf(lat) * std::cosf(lon + kLonEvery);
-			vertexData[start].position.y = std::sinf(lat);
-			vertexData[start].position.z = std::cosf(lat) * std::sinf(lon + kLonEvery);
-			vertexData[start].position.w = w;
-			vertexData[start].normal.x = vertexData[start].position.x;
-			vertexData[start].normal.y = vertexData[start].position.y;
-			vertexData[start].normal.z = vertexData[start].position.z;
-			vertexData[start].texcoord = { float(lonIndex + 1.0f) / float(kSubdivision), 1.0f - float(latIndex) / float(kSubdivision) };
+	//		//基準点c
+	//		start++;
+	//		vertexData[start].position.x = std::cosf(lat) * std::cosf(lon + kLonEvery);
+	//		vertexData[start].position.y = std::sinf(lat);
+	//		vertexData[start].position.z = std::cosf(lat) * std::sinf(lon + kLonEvery);
+	//		vertexData[start].position.w = w;
+	//		vertexData[start].normal.x = vertexData[start].position.x;
+	//		vertexData[start].normal.y = vertexData[start].position.y;
+	//		vertexData[start].normal.z = vertexData[start].position.z;
+	//		vertexData[start].texcoord = { float(lonIndex + 1.0f) / float(kSubdivision), 1.0f - float(latIndex) / float(kSubdivision) };
 
-			//基準点b
-			start++;
-			vertexData[start].position.x = std::cosf(lat + kLatEvery) * std::cosf(lon);
-			vertexData[start].position.y = std::sinf(lat + kLatEvery);
-			vertexData[start].position.z = std::cosf(lat + kLatEvery) * std::sinf(lon);
-			vertexData[start].position.w = w;
-			vertexData[start].normal.x = vertexData[start].position.x;
-			vertexData[start].normal.y = vertexData[start].position.y;
-			vertexData[start].normal.z = vertexData[start].position.z;
-			vertexData[start].texcoord = { float(lonIndex) / float(kSubdivision), 1.0f - float(latIndex + 1.0f) / float(kSubdivision) };
+	//		//基準点b
+	//		start++;
+	//		vertexData[start].position.x = std::cosf(lat + kLatEvery) * std::cosf(lon);
+	//		vertexData[start].position.y = std::sinf(lat + kLatEvery);
+	//		vertexData[start].position.z = std::cosf(lat + kLatEvery) * std::sinf(lon);
+	//		vertexData[start].position.w = w;
+	//		vertexData[start].normal.x = vertexData[start].position.x;
+	//		vertexData[start].normal.y = vertexData[start].position.y;
+	//		vertexData[start].normal.z = vertexData[start].position.z;
+	//		vertexData[start].texcoord = { float(lonIndex) / float(kSubdivision), 1.0f - float(latIndex + 1.0f) / float(kSubdivision) };
 
-			//基準点d
-			start++;
-			vertexData[start].position.x = std::cosf(lat + kLatEvery) * std::cosf(lon + kLonEvery);
-			vertexData[start].position.y = std::sinf(lat + kLatEvery);
-			vertexData[start].position.z = std::cosf(lat + kLatEvery) * std::sinf(lon + kLonEvery);
-			vertexData[start].position.w = w;
-			vertexData[start].normal.x = vertexData[start].position.x;
-			vertexData[start].normal.y = vertexData[start].position.y;
-			vertexData[start].normal.z = vertexData[start].position.z;
-			vertexData[start].texcoord = { float(lonIndex + 1) / float(kSubdivision), 1.0f - float(latIndex + 1) / float(kSubdivision) };
-		}
-	}
+	//		//基準点d
+	//		start++;
+	//		vertexData[start].position.x = std::cosf(lat + kLatEvery) * std::cosf(lon + kLonEvery);
+	//		vertexData[start].position.y = std::sinf(lat + kLatEvery);
+	//		vertexData[start].position.z = std::cosf(lat + kLatEvery) * std::sinf(lon + kLonEvery);
+	//		vertexData[start].position.w = w;
+	//		vertexData[start].normal.x = vertexData[start].position.x;
+	//		vertexData[start].normal.y = vertexData[start].position.y;
+	//		vertexData[start].normal.z = vertexData[start].position.z;
+	//		vertexData[start].texcoord = { float(lonIndex + 1) / float(kSubdivision), 1.0f - float(latIndex + 1) / float(kSubdivision) };
+	//	}
+	//}
 #pragma endregion
 
 
@@ -1102,7 +1102,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		else {
 			//ゲームの処理
 #pragma region Transformを使ってCBufferを更新する
-			transform.rotate.y += 0.03f;
+			//transform.rotate.y += 0.03f;
 			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 			Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 			Matrix4x4 viewMatrix = Inverse(cameraMatrix);
@@ -1214,7 +1214,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//描画用のDescriptHeap
 			ID3D12DescriptorHeap* descriptorHepes[] = { srvDescriptorHeap };
 			commandList->SetDescriptorHeaps(1, descriptorHepes);
-			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
 			//コマンドリストの内容を確定させる。
 			commandList->RSSetViewports(1, &viewport);
 			commandList->RSSetScissorRects(1, &scissorRect);
@@ -1222,8 +1221,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootSignature(rootSignature);
 			commandList->SetPipelineState(graphicsPipelineState);
 
+#pragma region モデルの描画
 
-#pragma region スフィアの描画
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
 			//現状を設定。POSに設定しているものとはまた別。おなじ物を設定すると考えておけばいい
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -1233,7 +1232,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootDescriptorTable(2, useMonsterBall ? textureSrvHandleGPU2 : textureSrvHandleGPU);
 			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 			//描画！
-			//commandList->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
+
+			//描画！
+			commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 #pragma endregion
 
 
@@ -1251,10 +1252,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 
-#pragma region モデルの描画
-			//描画！
-			//commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
-#pragma endregion
+			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
 
 
 #pragma region 画面表示をできるようにする
