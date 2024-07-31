@@ -1268,6 +1268,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}
 			ImGui::Separator();
 
+			// Lighting
+			if (ImGui::CollapsingHeader("Lighting")) {
+				ImGui::ColorEdit4("LightSetColor", &directionalLightData->color.x);
+				ImGui::DragFloat3("Lightdirection", &directionalLightData->direction.x, 0.01f, -1.0f, 1.0f);
+			}
+			ImGui::Separator();
+
 			// スフィアウィンドウ
 			if (ImGui::CollapsingHeader("3DObject")) {
 				ImGui::DragFloat3("Translation", &transform.translate.x, 0.01f);
@@ -1282,19 +1289,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			// モデルウィンドウ
 			if (ImGui::CollapsingHeader("Model"))
 			{
-				ImGui::DragFloat3("*ModelScale", &transformModel.scale.x, 0.01f);
-				ImGui::DragFloat3("*ModelRotate", &transformModel.rotate.x, 0.01f);
-				ImGui::DragFloat3("*ModelTransrate", &transformModel.translate.x, 0.01f);
+				ImGui::DragFloat3("ModelTransrate", &transformModel.translate.x, 0.01f);
+				ImGui::DragFloat3("ModelRotate", &transformModel.rotate.x, 0.01f);
+				ImGui::DragFloat3("ModelScale", &transformModel.scale.x, 0.01f);
 				if (ImGui::Button("Reset Transform")) {
 					transformModel = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 				}
-			}
-			ImGui::Separator();
-
-			// Lighting
-			if (ImGui::CollapsingHeader("Lighting")) {
-				ImGui::ColorEdit4("LightSetColor", &directionalLightData->color.x);
-				ImGui::DragFloat3("Lightdirection", &directionalLightData->direction.x, 0.01f, -1.0f, 1.0f);
 			}
 			ImGui::Separator();
 
