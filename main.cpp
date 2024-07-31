@@ -175,9 +175,6 @@ IDxcBlob* CompileShader(
 
 	Log(ConvertString(std::format(L"Compile Succeeded, path:{}, profile:{}\n", filePath, profile)));
 
-	shaderSource->Release();
-	shaderResult->Release();
-
 	return shaderBlob;
 }
 #pragma endregion
@@ -574,8 +571,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		infoQueue->PushStorageFilter(&filter);
 #pragma endregion
-
-		infoQueue->Release();
 	}
 #endif
 #pragma endregion
@@ -1382,7 +1377,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 			//描画！
 			// commandList->DrawInstanced(6, 1, 0, 0);
-			//commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 #pragma endregion
 
 
