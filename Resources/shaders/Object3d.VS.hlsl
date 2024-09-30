@@ -1,3 +1,4 @@
+
 #include "Object3d.hlsli"
 
 struct TransformationMatrix
