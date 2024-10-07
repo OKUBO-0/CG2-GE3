@@ -546,8 +546,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Log("Complete create D3D12Device!!!\n");
 #pragma endregion
 
-#ifdef _DEBUG
+	//入力初期化
+	Input* input = nullptr;
+	input = new Input();
+	input->Initialize(wc.hInstance, hwnd);
 
+#ifdef _DEBUG
 #pragma region エラー・警告時に停止
 	Microsoft::WRL::ComPtr<ID3D12InfoQueue> infoQueue = nullptr;
 
@@ -1190,12 +1194,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 
-	Input* input = nullptr;
-	input = new Input();
-	input->Initialize(wc.hInstance, hwnd);
-	delete input;
-
-
 #pragma region Transform変数
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,-1.5f,0.0f},{0.0f,0.0f,0.0f } };
 
@@ -1219,6 +1217,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			DispatchMessage(&msg);
 		}
 		else {
+			input->Update();
 			//ゲームの処理
 #pragma region Transformを使ってCBufferを更新する
 			transform.rotate.y += 0.03f;
@@ -1450,6 +1449,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 	CloseHandle(fenceEvent);
+	delete input;
 #ifdef _DEBUG
 #endif
 #pragma endregion
