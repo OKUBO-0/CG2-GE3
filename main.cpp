@@ -1,36 +1,36 @@
-
 #include <Windows.h>
 #include <cstdint>
 #include <string>
 #include <format>
+
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <cassert>
+#pragma comment(lib,"d3d12.lib")
+#pragma comment(lib,"dxgi.lib")
 #include <dxgidebug.h>
+#pragma comment(lib,"dxguid.lib")
 #include <dxcapi.h>
+#pragma comment(lib,"dxcompiler.lib")
 #include "Vector2.h"
 #include "Vector3.h"
 #include "Vector4.h"
-#include "MyMath.h"
 #include "Matrix4x4.h"
-#include<vector>
-#include <numbers>
-#include <algorithm>
-#include <fstream>
-#include <sstream>
-#include <wrl.h>
-
+#include "MyMath.h"
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
 #include "externals/DirectXTex/DirectXTex.h"
 #include "externals/DirectXTex/d3dx12.h"
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#include <vector>
+#include <numbers>
+#include <algorithm>
+#include <fstream>
+#include <sstream>
+#include <wrl.h>
+#include "Input.h"
 
-#pragma comment(lib,"d3d12.lib")
-#pragma comment(lib,"dxgi.lib")
-#pragma comment(lib,"dxguid.lib")
-#pragma comment(lib,"dxcompiler.lib")
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
 #pragma region Resource作成の関数化(CreateBufferResource)
@@ -448,7 +448,6 @@ D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(Microsoft::WRL::ComPtr<ID3D12
 }
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-
 	D3DResourceLeakChecker leakCheck;
 
 	CoInitializeEx(0, COINIT_MULTITHREADED);
@@ -1189,6 +1188,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
 		srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 #pragma endregion
+
+
+	Input* input = nullptr;
+	input = new Input();
+	input->Initialize(wc.hInstance, hwnd);
+	delete input;
+
 
 #pragma region Transform変数
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,-1.5f,0.0f},{0.0f,0.0f,0.0f } };
