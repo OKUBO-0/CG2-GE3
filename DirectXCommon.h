@@ -31,6 +31,11 @@ class DirectXCommon
 public:
 	//初期化
 	void Initialize(WinApp* winApp);
+	//描画前処理
+	void Begin();
+	//描画後処理
+	void End();
+
 	//SRVの指定番号のCPUデスクリプタハンドルを取得
 	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUDescriptorHandle(uint32_t index);
 	//SRVの指定番号のGPUデスクリプタハンドルを取得
@@ -77,6 +82,16 @@ private:
 	//RTV
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvStarHandle;
+	//RVTを2つ作るのでディスクリプタを2つ用意
+	std::array<D3D12_CPU_DESCRIPTOR_HANDLE, 2> rtvHandles;
+
+	//fence
+	Microsoft::WRL::ComPtr<ID3D12Fence> fence = nullptr;
+	HANDLE fenceEvent;
+	uint64_t fenceValue = 0;
+
+	//ビューポート
+	D3D12_VIEWPORT viewport{};
 
 	//シザー矩形
 	D3D12_RECT scissorRect{};
@@ -84,6 +99,9 @@ private:
 	//DXC
 	IDxcUtils* dxcUtils = nullptr;
 	IDxcCompiler3* dxcCompiler = nullptr;
+
+	//barrier
+	D3D12_RESOURCE_BARRIER barrier{};
 
 	//デスクリプタヒープを生成する
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> 

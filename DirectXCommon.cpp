@@ -40,7 +40,7 @@ void DirectXCommon::DeviceInitialize()
 		hr = useAdapter->GetDesc3(&adapterDesc);
 		assert(SUCCEEDED(hr));
 		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE)) {
-			Log(ConvertString(std::format(L"Use Adapater:{}\n", adapterDesc.Description)));
+			Log(ConvertString(std::format(L"Use Adapter:{}\n", adapterDesc.Description)));
 			break;
 		}
 		useAdapter = nullptr;
@@ -55,11 +55,11 @@ void DirectXCommon::DeviceInitialize()
 	D3D_FEATURE_LEVEL featureLevels[] = {
 	 D3D_FEATURE_LEVEL_12_2,D3D_FEATURE_LEVEL_12_1,D3D_FEATURE_LEVEL_12_0
 	};
-	const char* fetureLevelstrings[] = { "12.2","12.1","12.0" };
+	const char* featureLevelstrings[] = { "12.2","12.1","12.0" };
 	for (size_t i = 0; i < _countof(featureLevels); ++i) {
 		hr = D3D12CreateDevice(useAdapter.Get(), featureLevels[i], IID_PPV_ARGS(&device));
 		if (SUCCEEDED(hr)) {
-			Log(std::format("FeatureLevel:{}\n", fetureLevelstrings[i]));
+			Log(std::format("FeatureLevel:{}\n", featureLevelstrings[i]));
 			break;
 		}
 	}
@@ -114,12 +114,12 @@ void DirectXCommon::DepthBufferInitialize()
 	resourceDesc.Width = WinApp::kClientWidth;//Textureの幅
 	resourceDesc.Height = WinApp::kClientHeight;//Textureの高さ
 	resourceDesc.MipLevels = 1;//mipmapの数
-	resourceDesc.DepthOrArraySize = 1;//奥行きor配列Texturの配列数
-	resourceDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;//DetpthStencilとして利用可能なフォーマット
+	resourceDesc.DepthOrArraySize = 1;//奥行きor配列Textureの配列数
+	resourceDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;//DepthStencilとして利用可能なフォーマット
 	resourceDesc.SampleDesc.Count = 1;//サンプリング。１固定
 	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;//2次元
-	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;//DepthSrencilとして使う通知
-	//利用するhepの設定
+	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;//DepthStencilとして使う通知
+	//利用するheapの設定
 	D3D12_HEAP_PROPERTIES heapProperties{  };
 	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;//VRAM上に作る
 	//深度値のクリア設定
@@ -131,7 +131,7 @@ void DirectXCommon::DepthBufferInitialize()
 	hr = device->CreateCommittedResource(
 		&heapProperties,//Heapの設定
 		D3D12_HEAP_FLAG_NONE,//Heapの特殊設定。特になし
-		&resourceDesc,//REesourceの設定
+		&resourceDesc,//Resourceの設定
 		D3D12_RESOURCE_STATE_DEPTH_WRITE,//深度値を書き込む状態のしておく
 		&depthClearValue,//Clear最適値
 		IID_PPV_ARGS(&resource));//作成するResourceポインタへのポインタ
@@ -167,8 +167,6 @@ void DirectXCommon::RTVInitialize()
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;//2dテクスチャとして書き込む
 	//ディスクリプトの先頭を取得する
 	rtvStarHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	//RVTを2つ作るのでディスクリプタを2つ用意
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
 	//まず1つ目を作る。1つ目は最初のところに作る。作る場所をこちらで指定してあげる必要がある
 	rtvHandles[0] = rtvStarHandle;
 	device->CreateRenderTargetView(swapChainResources[0].Get(), &rtvDesc, rtvHandles[0]);
@@ -194,13 +192,10 @@ void DirectXCommon::DSVInitialize()
 void DirectXCommon::FenceInitialize()
 {
 #pragma region Fence
-	//初期値0でFenceを作る
-	Microsoft::WRL::ComPtr<ID3D12Fence> fence = nullptr;
-	uint64_t fenceValue = 0;
 	hr = device->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 	assert(SUCCEEDED(hr));
 	//fenceのSignalを待つためのイベントを作成する
-	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	assert(fenceEvent != nullptr);
 #pragma endregion
 }
@@ -208,8 +203,6 @@ void DirectXCommon::FenceInitialize()
 
 void DirectXCommon::ViewportInitialize()
 {
-	//ビューポート
-	D3D12_VIEWPORT viewport{};
 	//クライアント領域のサイズと一緒にして画面全体に表示
 	viewport.Width = WinApp::kClientWidth;
 	viewport.Height = WinApp::kClientHeight;
@@ -279,6 +272,79 @@ void DirectXCommon::Initialize(WinApp* winApp)
 	ScissorInitialize();
 	DxcCompilerInitialize();
 	ImguiInitialize();
+}
+
+
+void DirectXCommon::Begin()
+{
+	//これから書き込むバックバッファのインデックスを取得する
+	UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
+	//今回のバリアはTransition
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	//Noneにしておく
+	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	//バリアを張る対象のリソース。現在のバックバッファに対して行う
+	barrier.Transition.pResource = swapChainResources[backBufferIndex].Get();
+	//遷移前（現在）のResourceState
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	//遷移後のResourceState
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	//Transition Barrierを張る
+	commandList->ResourceBarrier(1, &barrier);
+	//描画先のRVTを設定する
+	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
+	//描画先のRTVとDSVを設定する
+	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
+	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	//指定した色で画面全体をクリアする
+	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };//青っぽい色。RGBAの順
+	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
+	//描画用のDescript
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeaps[] = { srvDescriptorHeap };
+	commandList->SetDescriptorHeaps(1, descriptorHeaps->GetAddressOf());
+	//コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
+	commandList->RSSetViewports(1, &viewport);
+	commandList->RSSetScissorRects(1, &scissorRect);
+}
+
+
+void DirectXCommon::End()
+{
+	//バックバッファのインデックスを取得する
+	UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
+	//画面に描く処理はすべて終わり、画面に映すので、状態遷移
+		//今回はRenderTargetからPresentにする
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	//TransitionBarrierを張る
+	commandList->ResourceBarrier(1, &barrier);
+	//コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
+	hr = commandList->Close();
+	assert(SUCCEEDED(hr));
+	//GPUにコマンドリストの実行を行わせる
+	ID3D12CommandList* commandLists[] = { commandList.Get() };
+	commandQueue->ExecuteCommandLists(1, commandLists);
+	//GPUとOSに画面の交換を行う通知する
+	swapChain->Present(1, 0);
+	//Fenceの値の更新
+	fenceValue++;
+	//GPUがここまでたどりついた時に、Fenceの値を指定したあたいに代入するようにsignalを送る
+	commandQueue->Signal(fence.Get(), fenceValue);
+	//Fenceの値が指定したSignal値にたどり着いているか確認する
+		//GetCompletebValueの初期値はFence作成時に渡した初期値
+	if (fence->GetCompletedValue() < fenceValue) {
+		//指定したSignalにたどりついていないので、たどり着くまで待つようにイベントを設定する
+		fence->SetEventOnCompletion(fenceValue, fenceEvent);
+		//イベントを待つ
+		WaitForSingleObject(fenceEvent, INFINITE);
+	}
+	//次のフレーム用のコマンドリストを準備
+	hr = commandAllocator->Reset();
+	assert(SUCCEEDED(hr));
+	hr = commandList->Reset(commandAllocator.Get(), nullptr);
+	assert(SUCCEEDED(hr));
 }
 
 
