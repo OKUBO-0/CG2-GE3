@@ -36,18 +36,24 @@ public:
 	//描画後処理
 	void End();
 
+
 	//SRVの指定番号のCPUデスクリプタハンドルを取得
 	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUDescriptorHandle(uint32_t index);
+
 	//SRVの指定番号のGPUデスクリプタハンドルを取得
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUDescriptorHandle(uint32_t index);
-	//SRVの指定番号のCPUデスクリプタハンドルを取得
-	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUDescriptorHandle(uint32_t index);
-	//SRVの指定番号のGPUデスクリプタハンドルを取得
-	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUDescriptorHandle(uint32_t index);
-	//SRVの指定番号のCPUデスクリプタハンドルを取得
-	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUDescriptorHandle(uint32_t index);
-	//SRVの指定番号のGPUデスクリプタハンドルを取得
-	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUDescriptorHandle(uint32_t index);
+
+	//RTVの指定番号のCPUデスクリプタハンドルを取得
+	D3D12_CPU_DESCRIPTOR_HANDLE GetRTVCPUDescriptorHandle(uint32_t index);
+
+	//RTVの指定番号のGPUデスクリプタハンドルを取得
+	D3D12_GPU_DESCRIPTOR_HANDLE GetRTVGPUDescriptorHandle(uint32_t index);
+
+	//DSVの指定番号のCPUデスクリプタハンドルを取得
+	D3D12_CPU_DESCRIPTOR_HANDLE GetDSVCPUDescriptorHandle(uint32_t index);
+
+	//DSVの指定番号のGPUデスクリプタハンドルを取得
+	D3D12_GPU_DESCRIPTOR_HANDLE GetDSVGPUDescriptorHandle(uint32_t index);
 
 private:
 	//WindowsAPI
