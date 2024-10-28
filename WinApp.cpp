@@ -2,8 +2,10 @@
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
-
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#pragma comment(lib,"winmm.lib")
+
+
 LRESULT WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) {
@@ -22,6 +24,10 @@ LRESULT WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 void WinApp::Initialize()
 {
+	timeBeginPeriod(1);
+
+	HRESULT hr = CoInitializeEx(0, COINIT_MULTITHREADED);
+
 	//ウィンドウプロシージャ
 	wc.lpfnWndProc = WindowProc;
 	//ウィンドウクラス名
@@ -32,7 +38,9 @@ void WinApp::Initialize()
 	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	//ウィンドウクラス登録する
 	RegisterClass(&wc);
+
 	RECT wrc = { 0,0,kClientWidth ,kClientHeight };
+
 	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
 	//ウィンドウ生成
 	hwnd = CreateWindow(

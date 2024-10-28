@@ -126,7 +126,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	CoInitializeEx(0, COINIT_MULTITHREADED);
 
-	OutputDebugStringA("HEllo,DIrectX!\n");
+	OutputDebugStringA("HEllo,DirectX!\n");
 
 	// ポインタ
 	WinApp* winApp = nullptr;
