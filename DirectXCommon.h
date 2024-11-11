@@ -73,7 +73,7 @@ public:
 
 	//CompileShader関数の作成
 	IDxcBlob* CompileShader(
-		//ComilerするSahaderファイルへのパス
+		//CompilerするShaderファイルへのパス
 		const std::wstring& filePath,
 		//compilerに使用するProfile
 		const wchar_t* profile);

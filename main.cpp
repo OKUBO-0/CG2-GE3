@@ -18,6 +18,8 @@
 #include "DirectXCommon.h"
 #include "D3DResourceLeakChecker.h"
 #include "Logger.h"
+#include "SpriteCommon.h"
+#include "Sprite.h"
 
 
 #pragma region MaterialData
@@ -132,18 +134,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	WinApp* winApp = nullptr;
 	DirectXCommon* dxCommon = nullptr;
 	Input* input = nullptr;
+	SpriteCommon* spriteCommon = nullptr;
 
 	// WindowsAPI初期化
 	winApp = new WinApp;
 	winApp->Initialize();
 
 	// DX初期化
-	dxCommon = new DirectXCommon;
+	dxCommon = new DirectXCommon();
 	dxCommon->Initialize(winApp);
 
 	// 入力初期化
 	input = new Input();
 	input->Initialize(winApp);
+
+	// スプライト共通部分の初期化
+	spriteCommon = new SpriteCommon();
+	spriteCommon->Initialize();
 
 
 #pragma region RootSignatureを生成
@@ -608,6 +615,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	dxCommon->GetDevice()->CreateShaderResourceView(textureResource3.Get(), &srvDesc3, textureSrvHandleCPU3);
 #pragma endregion 
 
+	Sprite* sprite = new Sprite();
+	sprite->Initialize();
 
 #pragma region Transform変数
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,-1.5f,0.0f},{0.0f,0.0f,0.0f } };
@@ -827,6 +836,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete winApp;
 	delete dxCommon;
 	delete input;
+	delete spriteCommon;
+	delete sprite;
 
 	return 0;
 }
