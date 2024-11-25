@@ -27,6 +27,15 @@ void TextureManager::Initialize(DirectXCommon* dxCommon)
 	textureDatas.reserve(DirectXCommon::kMaxSRVCount);
 }
 
+
+const DirectX::TexMetadata& TextureManager::GetMetaData(uint32_t textureIndex)
+{
+	assert(textureDatas.size() + kSRVIndexTop < DirectXCommon::kMaxSRVCount);
+	TextureData& textureData = textureDatas.back();
+	return textureData.metadata;
+}
+
+
 //Imgui で０番を使用するため１番から使用
 uint32_t TextureManager::kSRVIndexTop = 1;
 

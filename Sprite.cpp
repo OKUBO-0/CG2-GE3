@@ -45,6 +45,9 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath)
 	//単位行列を書き込んでおく
 	transformationMatrixData->WVP = MakeIdentity4x4();
 	transformationMatrixData->World = MakeIdentity4x4();
+
+	//画像のサイズに合わせる
+	AdjustTextureSize();
 }
 
 
@@ -54,23 +57,45 @@ void Sprite::Update()
 	transform.translate = { position.x,position.y,0.0f };
 	transform.scale = { size.x,size.y,1.0f, };
 
+	//アンカーポイント
+	float left = 0.0f - anchorPoint_.x;
+	float right = 1.0f - anchorPoint_.x;
+	float top = 0.0f - anchorPoint_.y;
+	float bottom = 1.0f - anchorPoint_.y;
+
+	//左右反転
+	if (isFlipX_) {
+		left = -left;
+		right = -right;
+	}
+	//上下反転
+	if (isFlipY_) {
+		top = -top;
+		bottom = -bottom;
+	}
+
+	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureIndex);
+	float tex_left = textureLeftTop_.x / metadata.width;
+	float tex_right = (textureLeftTop_.x + textureSize_.x) / metadata.width;
+	float tex_top = textureLeftTop_.y / metadata.height;
+	float tex_bottom = (textureLeftTop_.y + textureSize_.y) / metadata.height;
+
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 	//一個目
-	vertexData[0].position = { 0.0f,1.0f,0.0f,1.0f };
-	vertexData[0].texcoord = { 0.0f,1.0f };
-	vertexData[0].normal = { 0.0f,0.0f,-1.0f };
+	vertexData[0].position = { left,bottom,0.0f,1.0f };	 //左下
+	vertexData[1].position = { left,top,0.0f,1.0f };	 //左上
+	vertexData[2].position = { right,bottom,0.0f,1.0f }; //右下
+	vertexData[3].position = { right,top,0.0f,1.0f };    //右上
 
-	vertexData[1].position = { 0.0f,0.0f,0.0f,1.0f };
-	vertexData[1].texcoord = { 0.0f,0.0f };
-	vertexData[1].normal = { 0.0f,0.0f,-1.0f };
+	vertexData[0].texcoord = { tex_left,tex_bottom };    //左下
+	vertexData[1].texcoord = { tex_left,tex_top };		 //左上
+	vertexData[2].texcoord = { tex_right,tex_bottom };   //右下
+	vertexData[3].texcoord = { tex_right,tex_top };	     //右上
 
-	vertexData[2].position = { 1.0f,1.0f,0.0f,1.0f };
-	vertexData[2].texcoord = { 1.0f,1.0f };
-	vertexData[2].normal = { 0.0f,0.0f,-1.0f };
-	//二個目
-	vertexData[3].position = { 1.0f,0.0f,0.0f,1.0f };
-	vertexData[3].texcoord = { 1.0f,0.0f };
-	vertexData[3].normal = { 0.0f,0.0f,-1.0f };
+	vertexData[0].normal = { 0.0f,0.0f,-1.0f };          //左下	
+	vertexData[1].normal = { 0.0f,0.0f,-1.0f };          //左上
+	vertexData[2].normal = { 0.0f,0.0f,-1.0f };          //右下
+	vertexData[3].normal = { 0.0f,0.0f,-1.0f };          //右上
 
 	//インデックスリソースにデータ書き込む
 	indexResource->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
@@ -99,4 +124,15 @@ void Sprite::Draw()
 	//描画！
 	//commandList->DrawInstanced(6, 1, 0, 0);
 	spriteCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
+}
+
+
+void Sprite::AdjustTextureSize()
+{
+	//テクスチャメタデータを取得
+	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureIndex);
+	//テクスチャ切り出しサイズ
+	textureSize_ = { static_cast<float>(metadata.width),static_cast<float>(metadata.height) };
+	//画像サイズをテクスチャサイズに合わせる
+	size = textureSize_;
 }

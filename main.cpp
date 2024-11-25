@@ -345,33 +345,37 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 #pragma region Texturを読む
-	//Texture3を読んで転送する
-	//TextureManager::GetInstance()->LoadTexture(modelData.material.textureFilePath);
+	std::string textureFilePath[2]{ "Resources/monsterBall.png" ,"Resources/uvChecker.png" };
 #pragma endregion 
 
 
 	std::vector<Sprite*>sprites;
-	for (uint32_t i = 0; i < 5; ++i) {
+	for (uint32_t i = 0; i < 10; ++i) {
 		Sprite* sprite = new Sprite();
-		sprite->Initialize(spriteCommon, "Resources/monsterBall.png");
+		sprite->Initialize(spriteCommon, textureFilePath[1]);
 		sprites.push_back(sprite);
 	}
-
-	/*Sprite* sprite = new Sprite();
-	sprite->Initialize(spriteCommon);*/
 
 	int i = 0;
 	for (Sprite* sprite : sprites) {
 		Vector2 position = sprite->GetPosition();
 		Vector2 size = sprite->GetSize();
 
-		position.x = 200.0f * i;
+		position.x = 100.0f * i;
+		position.y = 200.0f;
 		size = Vector2(100, 100);
 
 		sprite->SetPosition(position);
 		sprite->SetSize(size);
+		sprite->SetAnchorPoint(Vector2{ 0.0f,0.0f });
+		sprite->SetIsFlipY(0);
+		sprite->SetTextureLeftTop(Vector2{ i * 64.0f,0.0f });
+		sprite->SetTextureSize(Vector2{ 64.0f,64.0f });
 		i++;
 	}
+
+	Vector2 rotation{ 0 };
+
 
 #pragma region Transform変数
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,-1.5f,0.0f},{0.0f,0.0f,0.0f } };

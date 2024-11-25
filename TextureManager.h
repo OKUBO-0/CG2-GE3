@@ -36,6 +36,9 @@ public:
 	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 
+	//メタデータを取得
+	const DirectX::TexMetadata& GetMetaData(uint32_t textureIndex);
+
 	//テクスチャファイルの読み込み
 	void LoadTexture(const std::string& filePath);
 
