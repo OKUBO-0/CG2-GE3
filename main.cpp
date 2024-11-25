@@ -361,7 +361,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Vector2 position = sprite->GetPosition();
 		Vector2 size = sprite->GetSize();
 
-		position.x = 100.0f * i;
+		position.x = 200.0f * i;
 		position.y = 200.0f;
 		size = Vector2(100, 100);
 
