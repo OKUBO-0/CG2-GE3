@@ -22,6 +22,8 @@
 #include "SpriteCommon.h"
 #include "Sprite.h"
 #include "TextureManager.h"
+#include "Object3DCommon.h"
+#include "Object3D.h"
 
 
 #pragma region MaterialData
@@ -141,11 +143,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	OutputDebugStringA("HEllo,DirectX!\n");
 
+
+#pragma region 基盤システム初期化
 	// ポインタ
 	WinApp* winApp = nullptr;
 	DirectXCommon* dxCommon = nullptr;
 	Input* input = nullptr;
 	SpriteCommon* spriteCommon = nullptr;
+	Object3dCommon* object3dCommon = nullptr;
 
 	// WindowsAPI初期化
 	winApp = new WinApp;
@@ -162,9 +167,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	input = new Input();
 	input->Initialize(winApp);
 
-	// スプライト共通部分の初期化
+	// スプライトの初期化
 	spriteCommon = new SpriteCommon();
 	spriteCommon->Initialize(dxCommon);
+
+	//3Dオブジェクトの初期化
+	object3dCommon = new Object3dCommon;
+	object3dCommon->Initialize();
+#pragma endregion 
 
 
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = nullptr;
@@ -355,6 +365,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		sprite->Initialize(spriteCommon, textureFilePath[1]);
 		sprites.push_back(sprite);
 	}
+
+#pragma region 最初のシーン初期化
+	//3Dオブジェクトの初期化
+	Object3d* object3d = new Object3d();
+	object3d->Initialize();
+#pragma endregion
 
 	int i = 0;
 	for (Sprite* sprite : sprites) {
@@ -589,8 +605,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete input;
 	delete spriteCommon;
 	for (Sprite* sprite : sprites) {
-		delete sprite; // 各Spriteオブジェクトの削除
+		delete sprite;
 	}
+	delete object3dCommon;
+	delete object3d;
 
 	return 0;
 }
