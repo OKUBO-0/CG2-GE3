@@ -1,6 +1,5 @@
 #include "Sprite.h"
 #include "SpriteCommon.h"
-#include "MyMath.h"
 #include "RenderingPipeline.h"
 #include "TextureManager.h"
 

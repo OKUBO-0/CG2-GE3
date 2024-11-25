@@ -137,6 +137,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="MyMath.h" />
     <ClInclude Include="Object3d.h" />
     <ClInclude Include="Object3dCommon.h" />
+    <ClInclude Include="RenderingData.h" />
     <ClInclude Include="RenderingPipeline.h" />
     <ClInclude Include="ResourceObject.h" />
     <ClInclude Include="Sprite.h" />

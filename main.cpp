@@ -1,19 +1,19 @@
 #include <string>
 #include <format>
-
-#include <windows.h>
-#pragma comment(lib,"dxguid.lib")
-#include "Vector2.h"
-#include "Vector3.h"
-#include "Vector4.h"
-#include "Matrix4x4.h"
-#include "MyMath.h"
-#include "RenderingPipeline.h"
-
 #include <numbers>
 #include <algorithm>
 #include <fstream>
 #include <sstream>
+#include <windows.h>
+#pragma comment(lib,"dxguid.lib")
+
+#include "Vector4.h"
+#include "Vector3.h"
+#include "Vector2.h"
+#include "Matrix4x4.h"
+#include "MyMath.h"
+#include "RenderingData.h"
+#include "RenderingPipeline.h"
 #include "Input.h"
 #include "WinApp.h"
 #include "DirectXCommon.h"
@@ -24,116 +24,6 @@
 #include "TextureManager.h"
 #include "Object3DCommon.h"
 #include "Object3D.h"
-
-
-#pragma region MaterialData
-MaterialData LoadMaterialTemplateFile(const std::string& directorypath, const std::string& filename) {
-
-	MaterialData materialData;//構築するMaterialData
-	std::string line;//ファイルから読んだ1行を格納するもの
-	std::ifstream file(directorypath + "/" + filename);//ファイルを開く
-	assert(file.is_open());//とりあえず開けなっかたら止める
-	while (std::getline(file, line)) {
-		std::string identifile;
-		std::stringstream s(line);
-		s >> identifile;
-
-		//identifierの応じた処理
-		if (identifile == "map_Kd") {
-
-			std::string textureFilename;
-			s >> textureFilename;
-			//連結してファイルパスにする
-			materialData.textureFilePath = directorypath + "/" + textureFilename;
-		}
-	}
-	return materialData;
-}
-#pragma endregion
-
-
-#pragma region LoadObjeFil関数
-ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename) {
-
-	ModelData modelData;//構築するModekData
-	std::vector<Vector4>positions;//位置
-	std::vector<Vector3>normals;//法線
-	std::vector<Vector2>texcoords;//テクスチャ座標
-	std::string line;//ファイルから読んだ1行を格納するもの
-
-	//ファイル読み込み
-	std::ifstream file(directoryPath + "/" + filename);//faileを開く
-	assert(file.is_open());//開けなかったら止める
-
-	while (std::getline(file, line)) {
-		std::string identifier;
-		std::istringstream s(line);
-		s >> identifier;//先頭の識別子を読む
-
-		if (identifier == "v") {
-
-			Vector4 position;
-			s >> position.x >> position.y >> position.z;
-			position.w = 1.0f;
-			position.x *= -1;
-			positions.push_back(position);
-		}
-		else if (identifier == "vt") {
-			Vector2 texcoord;
-			s >> texcoord.x >> texcoord.y;
-			texcoord.y = 1 - texcoord.y;
-			texcoords.push_back(texcoord);
-		}
-		else if (identifier == "vn") {
-
-			Vector3 normal;
-			s >> normal.x >> normal.y >> normal.z;
-			normal.x *= -1;
-			normals.push_back(normal);
-		}
-		else if (identifier == "f") {
-
-			VertexData triangle[3];
-			//面は三角形限定。その他は未対応
-			for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
-				std::string vertexDefinition;
-				s >> vertexDefinition;
-				//頂点の要素へのIndexは「位置・UV・法線」で格納されているので、分解してIndexを取得する
-				std::istringstream v(vertexDefinition);
-				uint32_t elementIndices[3];
-				for (int32_t element = 0; element < 3; ++element) {
-					std::string index;
-					std::getline(v, index, '/');//区切りでインデックスを読んでいく
-					elementIndices[element] = std::stoi(index);
-				}
-				//要素へのIndexから、実際の要素の値を取得して、頂点を構築する
-				Vector4 position = positions[elementIndices[0] - 1];
-				Vector2 texcoord = texcoords[elementIndices[1] - 1];
-				Vector3 normal = normals[elementIndices[2] - 1];
-
-				//VertexData veretex = { position,texcoord,normal };
-				//modelData.vertices.push_back(veretex);
-				triangle[faceVertex] = { position,texcoord,normal };
-
-			}
-			//頂点を逆順で登録刷ることで、周り順を逆にする
-			modelData.vertices.push_back(triangle[2]);
-			modelData.vertices.push_back(triangle[1]);
-			modelData.vertices.push_back(triangle[0]);
-
-		}
-		else if (identifier == "mtllib") {
-
-			//materialTemlateLibraryファイルの名前を取得する
-			std::string materialFilename;
-			s >> materialFilename;
-			//基本的にobjファイルと同一階層にmtlは存在させるので、ディレクトリ名とファイル名を渡す
-			modelData.material = LoadMaterialTemplateFile(directoryPath, materialFilename);
-		}
-	}
-	return modelData;
-}
-#pragma endregion 
 
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -173,34 +63,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//3Dオブジェクトの初期化
 	object3dCommon = new Object3dCommon;
-	object3dCommon->Initialize();
+	object3dCommon->Initialize(dxCommon);
 #pragma endregion 
-
-
-	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = nullptr;
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState = nullptr;
 
 
 #pragma region Resource
 	const uint32_t kSubdivision = 512;
-	ModelData modelData = LoadObjFile("resources", "axis.obj");
 
 #pragma region VertexResourceを生成
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource = dxCommon->CreateBufferResource(sizeof(VertexData) * kSubdivision * kSubdivision * 6);
-
-#pragma region ModelResourceを生成
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceModel = dxCommon->CreateBufferResource(sizeof(VertexData) * modelData.vertices.size());
-#pragma endregion
-
-
-#pragma region vertexResourceModel頂点バッファーを作成する
-	D3D12_VERTEX_BUFFER_VIEW VertexBufferViewModel{};
-	VertexBufferViewModel.BufferLocation = vertexResourceModel->GetGPUVirtualAddress();
-	VertexBufferViewModel.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size());
-	VertexBufferViewModel.StrideInBytes = sizeof(VertexData);
-	VertexData* vertexDataModel = nullptr;
-	vertexResourceModel->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataModel));
-	std::memcpy(vertexDataModel, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
 #pragma endregion
 
 
@@ -296,18 +167,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 
-#pragma region Material用のResourceを作る
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource = dxCommon->CreateBufferResource(sizeof(Material));
-	//マテリアルにデータを書き込む	
-	Material* materialDataSphere = nullptr;
-	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSphere));
-	//色
-	materialDataSphere->color = { Vector4(1.0f, 1.0f, 1.0f, 1.0f) };
-	materialDataSphere->enableLighting = true;
-	materialDataSphere->uvTransform = MakeIdentity4x4();
-#pragma endregion
-
-
 #pragma region WVP用のResourceを作る
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource = dxCommon->CreateBufferResource(sizeof(TransformationMatrix));
 	//データを書き込む
@@ -320,47 +179,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 
-#pragma region Model用のResourceを作る
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialResourceModel = dxCommon->CreateBufferResource(sizeof(Material));
-	//マテリアルにデータを書き込む	
-	Material* materialDataModel = nullptr;
-	materialResourceModel->Map(0, nullptr, reinterpret_cast<void**>(&materialDataModel));
-	//色
-	materialDataModel->color = { Vector4(1.0f, 1.0f, 1.0f, 1.0f) };
-	materialDataModel->enableLighting = true;
-	materialDataModel->uvTransform = MakeIdentity4x4();
-#pragma endregion
-
-
-#pragma region ModelTransform用のResourceを作る
-	Microsoft::WRL::ComPtr<ID3D12Resource> transformationMatrixResourceModel = dxCommon->CreateBufferResource(sizeof(TransformationMatrix));
-	//データを書き込む
-	TransformationMatrix* transformationMatrixDataModel = nullptr;
-	//書き込むためのアドレスを取得
-	transformationMatrixResourceModel->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataModel));
-	//単位行列を書き込む
-	transformationMatrixDataModel->WVP = MakeIdentity4x4();
-	transformationMatrixDataModel->World = MakeIdentity4x4();
-#pragma endregion
-
-
-#pragma region 平行光源用のResourceを作る
-	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource = dxCommon->CreateBufferResource(sizeof(DirectionalLight));
-	DirectionalLight* directionalLightData = nullptr;
-	directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData));
-	directionalLightData->color = { 1.0f,1.0f,1.0f,1.0f };
-	directionalLightData->direction = { 0.0f,-1.0f,1.0f };
-	directionalLightData->intensity = 1.0f;
-#pragma endregion
-
-
 #pragma region Texturを読む
 	std::string textureFilePath[2]{ "Resources/monsterBall.png" ,"Resources/uvChecker.png" };
 #pragma endregion 
 
 
 	std::vector<Sprite*>sprites;
-	for (uint32_t i = 0; i < 10; ++i) {
+	for (uint32_t i = 0; i < 1; ++i) {
 		Sprite* sprite = new Sprite();
 		sprite->Initialize(spriteCommon, textureFilePath[1]);
 		sprites.push_back(sprite);
@@ -369,7 +194,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma region 最初のシーン初期化
 	//3Dオブジェクトの初期化
 	Object3d* object3d = new Object3d();
-	object3d->Initialize();
+	object3d->Initialize(object3dCommon);
 #pragma endregion
 
 	int i = 0;
@@ -395,15 +220,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region Transform変数
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,-1.5f,0.0f},{0.0f,0.0f,0.0f } };
-
-#pragma region cameraTransform変数
-	Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
-
-#pragma region uvspriteTransform変数
-	Transform uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
-
-#pragma region model変数
-	Transform transformModel = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 #pragma endregion
 
 	bool useMonsterBall = false;
@@ -439,21 +255,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		
 		Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 		wvpData->WVP = worldViewProjectionMatrix;
-		wvpData->World = worldMatrix;
+		wvpData->World = worldMatrix;*/
 #pragma endregion
-
-
-#pragma region model用Matrix
-		Matrix4x4 worldMatrixmodel = MakeAffineMatrix(transformModel.scale, transformModel.rotate, transformModel.translate);
-		Matrix4x4 worldViewProjectionMatrixModel = Multiply(worldMatrixmodel, Multiply(viewMatrix, projectionMatrix));
-		transformationMatrixDataModel->WVP = worldViewProjectionMatrixModel;
-		transformationMatrixDataModel->World = worldMatrixmodel;
-#pragma endregion*/
 
 
 		for (Sprite* sprite : sprites) {
 			sprite->Update();
 		}
+
+		object3d->Update();
 
 
 /*#pragma region material用Matrix
@@ -469,11 +279,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::NewFrame();
 		ImGui::Begin("Settings");
 
-		// Color Edit ウィンドウ
-		if (ImGui::CollapsingHeader("SetColor")) {
-			ImGui::ColorEdit4("materialData", &materialDataSphere->color.x);
-		}
-		ImGui::Separator();
+		//// Color Edit ウィンドウ
+		//if (ImGui::CollapsingHeader("SetColor")) {
+		//	ImGui::ColorEdit4("materialData", &materialDataSphere->color.x);
+		//}
+		//ImGui::Separator();
 
 		// Texture変更
 		if (ImGui::CollapsingHeader("Texture change")) {
@@ -481,12 +291,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 		ImGui::Separator();
 
-		// Lighting
-		if (ImGui::CollapsingHeader("Lighting")) {
-			ImGui::ColorEdit4("LightSetColor", &directionalLightData->color.x);
-			ImGui::DragFloat3("directionalLight", &directionalLightData->direction.x, 0.01f, -1.0f, 1.0f);
-		}
-		ImGui::Separator();
+		//// Lighting
+		//if (ImGui::CollapsingHeader("Lighting")) {
+		//	ImGui::ColorEdit4("LightSetColor", &directionalLightData->color.x);
+		//	ImGui::DragFloat3("directionalLight", &directionalLightData->direction.x, 0.01f, -1.0f, 1.0f);
+		//}
+		//ImGui::Separator();
 
 		// スフィアウィンドウ
 		if (ImGui::CollapsingHeader("3DObject")) {
@@ -499,17 +309,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 		ImGui::Separator();
 
-		// モデルウィンドウ
-		if (ImGui::CollapsingHeader("Model"))
-		{
-			ImGui::DragFloat3("ModelTranslate", &transformModel.translate.x, 0.01f);
-			ImGui::DragFloat3("ModelRotate", &transformModel.rotate.x, 0.01f);
-			ImGui::DragFloat3("ModelScale", &transformModel.scale.x, 0.01f);
-			if (ImGui::Button("Reset Transform")) {
-				transformModel = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
-			}
-		}
-		ImGui::Separator();
+		//// モデルウィンドウ
+		//if (ImGui::CollapsingHeader("Model"))
+		//{
+		//	ImGui::DragFloat3("ModelTranslate", &transformModel.translate.x, 0.01f);
+		//	ImGui::DragFloat3("ModelRotate", &transformModel.rotate.x, 0.01f);
+		//	ImGui::DragFloat3("ModelScale", &transformModel.scale.x, 0.01f);
+		//	if (ImGui::Button("Reset Transform")) {
+		//		transformModel = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
+		//	}
+		//}
+		//ImGui::Separator();
 
 		//// スプライトウィンドウ
 		//if (ImGui::CollapsingHeader("2DSprite")) {
@@ -534,13 +344,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//}
 		//ImGui::Separator();
 
-		// UVTransform
-		if (ImGui::CollapsingHeader("UVTransform")) {
-			ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
-			ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
-			ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
-		}
-		ImGui::Separator();
+		//// UVTransform
+		//if (ImGui::CollapsingHeader("UVTransform")) {
+		//	ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
+		//	ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
+		//	ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
+		//}
+		//ImGui::Separator();
 
 
 		ImGui::End();
@@ -548,12 +358,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//DirectXの描画準備
 		dxCommon->Begin();
+
+#pragma region 3Dオブジェクト描画
+		//3dオブジェクトの描画準備。3Dオブジェクトの描画に共通のグラフィックスコマンドを積む
+		object3dCommon->CommonDraw();
+		object3d->Draw();
+#pragma endregion
+
+
+#pragma region スプライト描画
 		//Spriteの描画準備
 		spriteCommon->CommonDraw();
 
 		for (Sprite* sprite : sprites) {
 			sprite->Draw();
 		}
+#pragma endregion
+
 
 //#pragma region スフィアの描画
 //		dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
@@ -565,17 +386,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 //		dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 //		//描画！
 //		//dxCommon->GetCommandList()->DrawInstanced(kSubdivision * kSubdivision * 6, 1, 0, 0);
-//#pragma endregion
-
-
-//#pragma region Modelの描画
-//		dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &VertexBufferViewModel);
-//		//wvp用のCBufferの場所を設定
-//		dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceModel->GetGPUVirtualAddress());
-//		dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU3);
-//		dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
-//		//描画！
-//		//dxCommon->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 //#pragma endregion
 
 
