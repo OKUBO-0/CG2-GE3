@@ -8,6 +8,7 @@
 #include "Vector4.h"
 #include "Matrix4x4.h"
 #include "MyMath.h"
+#include "RenderingPipeline.h"
 
 #include <numbers>
 #include <algorithm>
@@ -49,23 +50,26 @@ MaterialData LoadMaterialTemplateFile(const std::string& directorypath, const st
 #pragma endregion
 
 
-#pragma region LoadObjectFil関数
+#pragma region LoadObjeFil関数
 ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename) {
-	ModelData modelData;            //構築するModelData
-	std::vector<Vector4>positions;  //位置
-	std::vector<Vector3>normals;    //法線
-	std::vector<Vector2>texcoords;  //テクスチャ座標
-	std::string line;               //ファイルから読んだ1行を格納するもの
 
-	std::ifstream file(directoryPath + "/" + filename);  //fileを開く
-	assert(file.is_open());                               //開けなかったら止める
+	ModelData modelData;//構築するModekData
+	std::vector<Vector4>positions;//位置
+	std::vector<Vector3>normals;//法線
+	std::vector<Vector2>texcoords;//テクスチャ座標
+	std::string line;//ファイルから読んだ1行を格納するもの
+
+	//ファイル読み込み
+	std::ifstream file(directoryPath + "/" + filename);//faileを開く
+	assert(file.is_open());//開けなかったら止める
 
 	while (std::getline(file, line)) {
 		std::string identifier;
 		std::istringstream s(line);
-		s >> identifier;  //先頭の識別子を読む
+		s >> identifier;//先頭の識別子を読む
 
 		if (identifier == "v") {
+
 			Vector4 position;
 			s >> position.x >> position.y >> position.z;
 			position.w = 1.0f;
@@ -79,12 +83,14 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 			texcoords.push_back(texcoord);
 		}
 		else if (identifier == "vn") {
+
 			Vector3 normal;
 			s >> normal.x >> normal.y >> normal.z;
 			normal.x *= -1;
 			normals.push_back(normal);
 		}
 		else if (identifier == "f") {
+
 			VertexData triangle[3];
 			//面は三角形限定。その他は未対応
 			for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
@@ -102,17 +108,21 @@ ModelData LoadObjFile(const std::string& directoryPath, const std::string& filen
 				Vector4 position = positions[elementIndices[0] - 1];
 				Vector2 texcoord = texcoords[elementIndices[1] - 1];
 				Vector3 normal = normals[elementIndices[2] - 1];
-				// VertexData vertex = { position, texcoord, normal };
-				// modelData.vertices.push_back(vertex);
-				triangle[faceVertex] = { position, texcoord, normal };
+
+				//VertexData veretex = { position,texcoord,normal };
+				//modelData.vertices.push_back(veretex);
+				triangle[faceVertex] = { position,texcoord,normal };
+
 			}
 			//頂点を逆順で登録刷ることで、周り順を逆にする
 			modelData.vertices.push_back(triangle[2]);
 			modelData.vertices.push_back(triangle[1]);
 			modelData.vertices.push_back(triangle[0]);
+
 		}
 		else if (identifier == "mtllib") {
-			//materialTemplateLibraryファイルの名前を取得する
+
+			//materialTemlateLibraryファイルの名前を取得する
 			std::string materialFilename;
 			s >> materialFilename;
 			//基本的にobjファイルと同一階層にmtlは存在させるので、ディレクトリ名とファイル名を渡す
@@ -156,6 +166,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	spriteCommon = new SpriteCommon();
 	spriteCommon->Initialize(dxCommon);
 
+
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState = nullptr;
 
@@ -190,7 +201,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 	VertexData* vertexData = nullptr;
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
 #pragma endregion
 
 
@@ -334,22 +344,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 
-
 #pragma region Texturを読む
-	// Textureを読んで転送する
-	TextureManager::GetInstance()->LoadTexture("Resources/uvChecker.png");
-
-	//Texture2を読んで転送する
-	TextureManager::GetInstance()->LoadTexture("Resources/monsterBall.png");
-
 	//Texture3を読んで転送する
-	TextureManager::GetInstance()->LoadTexture(modelData.material.textureFilePath);
+	//TextureManager::GetInstance()->LoadTexture(modelData.material.textureFilePath);
 #pragma endregion 
+
 
 	std::vector<Sprite*>sprites;
 	for (uint32_t i = 0; i < 5; ++i) {
 		Sprite* sprite = new Sprite();
-		sprite->Initialize(spriteCommon, "Resources/uvChecker.png");
+		sprite->Initialize(spriteCommon, "Resources/monsterBall.png");
 		sprites.push_back(sprite);
 	}
 
@@ -360,12 +364,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	for (Sprite* sprite : sprites) {
 		Vector2 position = sprite->GetPosition();
 		Vector2 size = sprite->GetSize();
+
 		position.x = 200.0f * i;
 		size = Vector2(100, 100);
+
 		sprite->SetPosition(position);
 		sprite->SetSize(size);
 		i++;
-
 	}
 
 #pragma region Transform変数

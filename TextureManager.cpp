@@ -39,37 +39,48 @@ void TextureManager::LoadTexture(const std::string& filePath)
 		[&](TextureData& textureData) {return textureData.filePath == filePath; }
 	);
 	assert(textureDatas.size() + kSRVIndexTop < DirectXCommon::kMaxSRVCount);
+
 	if (it != textureDatas.end()) {
 		return;//酔いこみ済みなら早期return
+
 	}
+
 	//テクスチャファイルを読んでプログラムで扱えるようにする
 	DirectX::ScratchImage image{};
 	std::wstring filePathW = ConvertString(filePath);
 	HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
 	assert(SUCCEEDED(hr));
+
 	//ミニマップの作成
 	DirectX::ScratchImage mipImages{};
 	hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_SRGB, 0, mipImages);
 	assert(SUCCEEDED(hr));
+
 	//テクスチャデータを追加
 	textureDatas.resize(textureDatas.size() + 1);
 	//追加したデータの参照を取得する
 	TextureData& textureData = textureDatas.back();
+
 	textureData.filePath = ConvertString(filePathW);
-	textureData.metadata = image.GetMetadata();
-	textureData.resource = DirectXCommon::CreateTextureResource(textureData.metadata);
+	textureData.metadata = mipImages.GetMetadata();
+	textureData.resource = dxCommon_->CreateTextureResource(textureData.metadata);
+
 	Microsoft::WRL::ComPtr<ID3D12Resource>  intermediateResource = dxCommon_->UploadTextureData(textureData.resource, mipImages);
+	dxCommon_->CommandKick();
+
 	//テクスチャデータの要素番号をSRVのインデックスとする
 	uint32_t srvIndex = static_cast<uint32_t>(textureDatas.size() - 1) + kSRVIndexTop;
-	textureData.srvHandleCPU = DirectXCommon::GetSRVCPUDescriputorHandole(srvIndex);
-	textureData.srvHandleGPU = DirectXCommon::GetSRVGPUDescriputorHandole(srvIndex);
+
+	textureData.srvHandleCPU = dxCommon_->GetSRVCPUDescriptorHandle(srvIndex);
+	textureData.srvHandleGPU = dxCommon_->GetSRVGPUDescriptorHandle(srvIndex);
+
 	//meraDaraを気にSRVの設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{  };
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//2Dテクスチャ
 	srvDesc.Texture2D.MipLevels = UINT(textureData.metadata.mipLevels);
-	dxCommon_->UploadTextureData(textureData.resource, mipImages);
-	DirectXCommon::GetDevice()->CreateShaderResourceView(textureData.resource, &srvDesc, textureData.srvHandleCPU);
+
+	dxCommon_->GetDevice()->CreateShaderResourceView(textureData.resource.Get(), &srvDesc, textureData.srvHandleCPU);
 }
 
 
@@ -86,6 +97,7 @@ uint32_t TextureManager::GetTextureIndexByFilePath(const std::string& filePath)
 		uint32_t textureIndex = static_cast<uint32_t>(std::distance(textureDatas.begin(), it));
 		return textureIndex;
 	}
+
 	assert(0);
 	return 0;
 }
@@ -94,6 +106,8 @@ uint32_t TextureManager::GetTextureIndexByFilePath(const std::string& filePath)
 D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(uint32_t textureIndex)
 {
 	assert(textureDatas.size() + kSRVIndexTop < DirectXCommon::kMaxSRVCount);
+
 	TextureData& textureData = textureDatas.back();
+
 	return textureData.srvHandleGPU;
 }

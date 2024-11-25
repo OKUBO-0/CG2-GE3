@@ -90,6 +90,8 @@ public:
 	[[nodiscard]]
 	Microsoft::WRL::ComPtr<ID3D12Resource> UploadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource>texture, const DirectX::ScratchImage& mipImages);
 
+	void CommandKick();
+
 	// 最大SRV数(最大テクスチャ枚数)
 	static const uint32_t kMaxSRVCount;
 

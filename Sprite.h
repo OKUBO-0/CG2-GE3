@@ -1,8 +1,9 @@
 #pragma once
-#include "Matrix4x4.h"
-#include "Vector4.h"
-#include "Vector3.h"
+
 #include "Vector2.h"
+#include "Vector3.h"
+#include "Vector4.h"
+#include "Matrix4x4.h"
 #include <assert.h>
 #include <cmath>
 #include <stdio.h>
@@ -20,17 +21,20 @@ class Sprite
 		Vector2 texcoord;
 		Vector3 normal;
 	};
+
 	struct Material {
 		Vector4 color;
 		int32_t enableLighting;
 		float padding[3];
 		Matrix4x4 uvTransform;
 	};
+
 	struct TransformationMatrix
 	{
 		Matrix4x4 WVP;
 		Matrix4x4 World;
 	};
+
 	struct Transform {
 		Vector3 scale;
 		Vector3 rotate;
@@ -79,12 +83,12 @@ private:
 	uint32_t* indexData = nullptr;
 	Material* materialData = nullptr;
 	TransformationMatrix* transformationMatrixData = nullptr;
-	////vertexResourceSprite頂点バッファーを作成する
+
+	//vertexResourceSprite頂点バッファーを作成する
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 	//IndexBufferSprite頂点バッファーを作成する
 	D3D12_INDEX_BUFFER_VIEW indexBufferView;
-
-	// Transform
+	//Transform
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
 	//設定用SRT
