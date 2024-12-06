@@ -5,11 +5,11 @@
 #include <sstream>
 #include <assert.h>
 
-void Model::Initialize(ModelCommon* modelCommon)
+void Model::Initialize(ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename)
 {
 	modelCommon_ = modelCommon;
 
-	modelData = LoadObjectFile("Resources", "plane.obj");
+	modelData = LoadObjectFile(directorypath, filename);
 
 	//モデルオブジェクト
 	//モデル用のVertexResourceを作成

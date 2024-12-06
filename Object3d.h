@@ -22,7 +22,8 @@ public:
 	// 描画
 	void Draw();
 
-	void Setmodel(Model* model) { model_ = model; }
+	void SetModel(Model* model) { model_ = model; }
+	void SetModel(const std::string& filepath);
 
 	//transform
 	void SetTransform(const Transform& transform) { this->transform = transform; }
@@ -30,10 +31,8 @@ public:
 
 	//スケール
 	void SetScale(const Vector3& scale) { transform.scale = scale; }
-	
 	//回転
 	void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
-	
 	//位置
 	void SetTranslate(const Vector3& translate) { transform.translate = translate; }
 

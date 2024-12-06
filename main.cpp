@@ -20,12 +20,12 @@
 #include "Logger.h"
 #include "SpriteCommon.h"
 #include "Sprite.h"
-#include "TextureManager.h"
 #include "Object3DCommon.h"
 #include "Object3D.h"
 #include "RenderingData.h"
 #include "Model.h"
-#include "ModelCommon.h"
+#include "ModelManager.h"
+#include "TextureManager.h"
 
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -65,10 +65,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	object3dCommon = new Object3dCommon;
 	object3dCommon->Initialize(dxCommon);
 
-	//モデルの共通部初期化
-	ModelCommon* modelCommon = nullptr;
-	modelCommon = new ModelCommon;
-	modelCommon->Initialize(dxCommon);
+	//3Dモデルマネージャの初期化
+	ModelManager::GetInstants()->Initialize(dxCommon);
 #pragma endregion 
 
 
@@ -198,18 +196,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma region 最初のシーン初期化
 	//モデル初期化
-	Model* model_ = new Model();
-	model_->Initialize(modelCommon);
+	ModelManager::GetInstants()->LoadModel("plane.obj");
+	ModelManager::GetInstants()->LoadModel("axis.obj");
 
 	//3Dオブジェクトの初期化
 	Object3d* object3d = new Object3d();
 	object3d->Initialize(object3dCommon);
-	object3d->Setmodel(model_);
+	object3d->SetModel("plane.obj");
 
 	//3Dオブジェクトの初期化
 	Object3d* object3d2nd = new Object3d();
 	object3d2nd->Initialize(object3dCommon);
-	object3d2nd->Setmodel(model_);
+	object3d2nd->SetModel("axis.obj");
 #pragma endregion
 
 	int i = 0;
@@ -440,6 +438,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	winApp->Finalize();
 	// 解放処理
 	TextureManager::GetInstance()->Finalize();
+	ModelManager::GetInstants()->Finalize();
 	delete winApp;
 	delete dxCommon;
 	delete input;
@@ -450,8 +449,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete object3dCommon;
 	delete object3d;
 	delete object3d2nd;
-	delete modelCommon;
-	delete model_;
 
 	return 0;
 }

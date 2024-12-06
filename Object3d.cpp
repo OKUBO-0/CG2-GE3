@@ -3,6 +3,7 @@
 #include "MyMath.h"
 #include "TextureManager.h"
 #include "RenderingPipeline.h"
+#include "ModelManager.h"
 
 
 void Object3d::Initialize(Object3dCommon* object3dCommon)
@@ -60,4 +61,10 @@ void Object3d::Draw()
 	if (model_) {
 		model_->Draw();
 	}
+}
+
+void Object3d::SetModel(const std::string& filepath)
+{
+	//もでるを検索してセットする
+	model_ = ModelManager::GetInstants()->FindModel(filepath);
 }

@@ -7,7 +7,7 @@ class Model
 {
 public:
 	// 初期化
-	void Initialize(ModelCommon* modeleCommon);
+	void Initialize(ModelCommon* modeleCommon, const std::string& directorypath, const std::string& filename);
 
 	// 描画
 	void Draw();
