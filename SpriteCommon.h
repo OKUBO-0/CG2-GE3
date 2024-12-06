@@ -5,23 +5,20 @@ class SpriteCommon
 {
 
 public:
-
-	/// <summary>
-	/// 初期化
-	/// </summary>
+	// 初期化
 	void Initialize(DirectXCommon* dxCommon);
 
-	//共通描画設定
+	// 共通描画設定
 	void CommonDraw();
 
 	DirectXCommon* GetDxCommon()const { return dxCommon_; }
 
 
 private:
-	//ルートシグネチャの作成
+	// ルートシグネチャの作成
 	void RootSignatureInitialize();
 
-	//グラフィックスパイプライン
+	// グラフィックスパイプライン
 	void GraphicsPipelineInitialize();
 
 private:

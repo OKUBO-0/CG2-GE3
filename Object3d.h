@@ -5,6 +5,7 @@
 #include "Vector3.h"
 #include "Vector2.h"
 #include "RenderingData.h"
+#include "Model.h"
 
 class Object3dCommon;
 class Object3d
@@ -21,8 +22,20 @@ public:
 	// 描画
 	void Draw();
 
-	static MaterialData LoadMaterialTemplateFile(const std::string& directorypath, const std::string& filename);
-	static ModelData LoadObjeFile(const std::string& ditrectoryPath, const std::string& filename);
+	void Setmodel(Model* model) { model_ = model; }
+
+	//transform
+	void SetTransform(const Transform& transform) { this->transform = transform; }
+	Transform GetTransform() { return transform; }
+
+	//スケール
+	void SetScale(const Vector3& scale) { transform.scale = scale; }
+	
+	//回転
+	void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
+	
+	//位置
+	void SetTranslate(const Vector3& translate) { transform.translate = translate; }
 
 
 private:
@@ -31,37 +44,21 @@ private:
 
 
 	// モデル
-	// objファイルのデータ
-	ModelData modelData;
-	// バッファリソース
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;
-	// バッファリソース内のデータを指すポインタ
-	VertexData* vertexData = nullptr;
-	// バッファリソースの使い道を補足するバッファビュー
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
+	Model* model_ = nullptr;
 
-
-	// マテリアル
-	// modelマテリアル用のリソースを作る。今回color1つ分のサイズを用意する
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
-	// マテリアルにデータを書き込む	
-	Material* materialData = nullptr;
 	// トランスフォーム
 	// ModelTransform用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
 	Microsoft::WRL::ComPtr<ID3D12Resource> transformationMatrixResource;
 	// データを書き込む
-	TransformationMatrix* transformaitionMatrixData = nullptr;
-
+	TransformationMatrix* transformationMatrixData = nullptr;
 
 	// 平行光源
-	// 平行光源用のResoureceを作成
+	// 平行光源用のResourceを作成
 	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource;
 	DirectionalLight* directionalLightData = nullptr;
-
 
 	// SRT
 	Transform transform;
 	// カメラ用のTransformを作る
 	Transform cameraTransform;
 };
-

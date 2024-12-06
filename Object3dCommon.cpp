@@ -114,14 +114,14 @@ void Object3dCommon::GraphicsPipelineInitialize()
 	//すべての色素要素を書き込む
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 	
-	//RasiterzerStateの設定
+	//RasterizerStateの設定
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
 	//裏面（時計回り）を表示しない
 	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
 	//三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	//shaderをコンパイルする
-	IDxcBlob* vertexshaderBlob = dxCommon_->CompileShader(L"Resources/Shaders/Object3D.VS.hlsl",
+	IDxcBlob* vertexsheaderBlob = dxCommon_->CompileShader(L"Resources/Shaders/Object3D.VS.hlsl",
 		L"vs_6_0");
 	assert(vertexshaderBlob != nullptr);
 	IDxcBlob* pixelShaderBlob = dxCommon_->CompileShader(L"Resources/Shaders/Object3D.PS.hlsl",
@@ -130,7 +130,7 @@ void Object3dCommon::GraphicsPipelineInitialize()
 
 	//DepthStencilStateの設定
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
-	//Deothの機能を有効化する
+	//Depthの機能を有効化する
 	depthStencilDesc.DepthEnable = true;
 	//書き込みします
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
@@ -141,8 +141,8 @@ void Object3dCommon::GraphicsPipelineInitialize()
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
 	graphicsPipelineStateDesc.pRootSignature = rootSignature.Get();//RootSignature
 	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;//InputLayout
-	graphicsPipelineStateDesc.VS = { vertexshaderBlob->GetBufferPointer(),
-	vertexshaderBlob->GetBufferSize() };//VertexShader
+	graphicsPipelineStateDesc.VS = { vertexsheaderBlob->GetBufferPointer(),
+	vertexsheaderBlob->GetBufferSize() };//VertexShader
 	graphicsPipelineStateDesc.PS = { pixelShaderBlob->GetBufferPointer(),
 	pixelShaderBlob->GetBufferSize() };//pixelShader
 	graphicsPipelineStateDesc.BlendState = blendDesc;//Blendstate
