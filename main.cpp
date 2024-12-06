@@ -232,7 +232,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 #pragma region Transform変数
-	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,-1.5f,0.0f},{0.0f,0.0f,0.0f } };
+	Transform transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
 	Transform transformModel = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 #pragma endregion
@@ -321,12 +321,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		// スフィアウィンドウ
 		if (ImGui::CollapsingHeader("3DObject")) {
-			ImGui::DragFloat3("Translation", &transform.translate.x, 0.01f);
+		/*	ImGui::DragFloat3("Translation", &transform.translate.x, 0.01f);
 			ImGui::DragFloat3("Rotation", &transform.rotate.x, 0.01f);
 			ImGui::DragFloat2("Scale", &transform.scale.x, 0.01f);
 			if (ImGui::Button("Reset Transform")) {
 				transform = { {1.0f, 1.0f, 1.0f}, {0.0f, -1.5f, 0.0f}, {0.0f, 0.0f, 0.0f} };
-			}
+			}*/
 		}
 		ImGui::Separator();
 
@@ -334,9 +334,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		if (ImGui::CollapsingHeader("Model")) {
 			transformModel = object3d->GetTransform();
 
-			ImGui::DragFloat3("ModelTranslate", &transformModel.translate.x, 0.01f);
-			ImGui::DragFloat3("ModelRotate", &transformModel.rotate.x, 0.01f);
 			ImGui::DragFloat3("ModelScale", &transformModel.scale.x, 0.01f);
+			ImGui::DragFloat3("ModelRotate", &transformModel.rotate.x, 0.01f);
+			ImGui::DragFloat3("ModelTranslate", &transformModel.translate.x, 0.01f);
 
 			object3d->SetTransform(transformModel);
 			//	ImGui::DragFloat3("ModelTranslate", &transformModel.translate.x, 0.01f);

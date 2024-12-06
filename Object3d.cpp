@@ -32,9 +32,10 @@ void Object3d::Initialize(Object3dCommon* object3dCommon)
 #pragma endregion
 	
 	//カメラとモデルのTransform変数
-	transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
+	transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{1.0f,0.0f,0.0f} };
+
 	//カメラ用のTransformを作る
-	cameraTransform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{ 0.0f,0.0f,-5.0f} };
+	cameraTransform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{ 0.0f,0.0f,-10.0f} };
 }
 
 
