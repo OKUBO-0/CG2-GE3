@@ -22,6 +22,8 @@ LRESULT WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 void WinApp::Initialize()
 {
+	HRESULT hr = CoInitializeEx(0, COINIT_MULTITHREADED);
+
 	//ウィンドウプロシージャ
 	wc.lpfnWndProc = WindowProc;
 	//ウィンドウクラス名
@@ -30,10 +32,14 @@ void WinApp::Initialize()
 	wc.hInstance = GetModuleHandle(nullptr);
 	//カーソル
 	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+
 	//ウィンドウクラス登録する
 	RegisterClass(&wc);
+
 	RECT wrc = { 0,0,kClientWidth ,kClientHeight };
+
 	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
+
 	//ウィンドウ生成
 	hwnd = CreateWindow(
 		wc.lpszClassName, L"CG2,",
@@ -48,10 +54,6 @@ void WinApp::Initialize()
 		nullptr
 	);
 	ShowWindow(hwnd, SW_SHOW);
-}
-
-void WinApp::Update()
-{
 }
 
 void WinApp::Finalize()

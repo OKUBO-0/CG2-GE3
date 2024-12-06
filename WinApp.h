@@ -12,14 +12,14 @@ public:
 	static const int32_t kClientHeight = 720;
 
 public:
-
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
+
 	//初期化
 	void Initialize();
-	//更新
-	void Update();
+
 	//終了
 	void Finalize();
+
 	//Getter
 	HWND GetHwnd()const { return hwnd; }
 	HINSTANCE GetHInstance()const { return wc.hInstance; }
