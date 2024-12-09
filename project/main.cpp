@@ -98,8 +98,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
 		float lat = -std::numbers::pi_v<float> / 2.0f + kLatEvery * latIndex;//θ
 		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
-			//テクスチャ用のTexcoord
-
 			//書き込む最初の場所
 			uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
 			float lon = lonIndex * kLonEvery;
