@@ -6,6 +6,7 @@
 #include "Vector2.h"
 #include "RenderingData.h"
 #include "Model.h"
+#include "Camera.h"
 
 class Object3dCommon;
 class Object3d
@@ -36,6 +37,8 @@ public:
 	//位置
 	void SetTranslate(const Vector3& translate) { transform.translate = translate; }
 
+	//カメラ
+	void SetCamera(Camera* camera) { this->camera = camera; }
 
 private:
 
@@ -58,12 +61,9 @@ private:
 
 	// SRT
 	Transform transform;
-	// カメラ用のTransformを作る
-	Transform cameratransform;
-	Matrix4x4 cameraMatrix;
-	Matrix4x4 viewMatrix;
-
 	Matrix4x4 worldMatrix;
-	Matrix4x4 projectionMatrix;
 	Matrix4x4 worldViewProjectionMatrix;
+
+	// カメラ
+	Camera* camera = nullptr;
 };

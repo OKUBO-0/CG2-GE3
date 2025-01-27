@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DirectXCommon.h"
-
+#include "Camera.h"
 
 class Object3dCommon
 {
@@ -22,9 +22,14 @@ public:
 	//DXCommon
 	DirectXCommon* GetDxCommon()const { return dxCommon_; }
 
+	void SetDefaultCamera(Camera* camera) { this->defaultCamera = camera; }
+	Camera* GetDefaultCamera()const { return defaultCamera; }
+
 private:
 
 	DirectXCommon* dxCommon_;
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState = nullptr;
+
+	Camera* defaultCamera = nullptr;
 };

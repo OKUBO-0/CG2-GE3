@@ -192,11 +192,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	wvpData->World = wvpData->World.MakeIdentity4x4();
 #pragma endregion
 
+#pragma region 最初のシーン初期化
+	//カメラの生成
+	Camera* camera = new Camera();
+	camera->SetRotate({ 0,0,0, });
+	camera->SetTranslate({ 0,0,-10, });
+	object3dCommon->SetDefaultCamera(camera);
 
-#pragma region Texturを読む
 	std::string textureFilePath[2]{ "Resources/monsterBall.png" ,"Resources/uvChecker.png" };
-#pragma endregion 
-
 
 	std::vector<Sprite*>sprites;
 	for (uint32_t i = 0; i < 1; ++i) {
@@ -205,7 +208,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		sprites.push_back(sprite);
 	}
 
-#pragma region 最初のシーン初期化
 	//モデル初期化
 	ModelManager::GetInstants()->LoadModel("plane.obj");
 	ModelManager::GetInstants()->LoadModel("axis.obj");
@@ -251,6 +253,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool useMonsterBall = false;
 
 	while (true) {
+		camera->Update();
 		//Windowsのメッセージ処理
 		if (winApp->ProcessMessage()) {
 			//ゲームループを抜ける
