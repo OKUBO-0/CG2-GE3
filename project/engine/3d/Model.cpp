@@ -1,5 +1,4 @@
 #include "Model.h"
-#include "RenderingPipeline.h"
 #include "TextureManager.h"
 #include <fstream>
 #include <sstream>

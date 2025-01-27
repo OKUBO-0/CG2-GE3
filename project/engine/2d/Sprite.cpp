@@ -1,8 +1,8 @@
 #include "Sprite.h"
 #include "SpriteCommon.h"
-#include "RenderingPipeline.h"
 #include "TextureManager.h"
 #include "Matrix4x4.h"
+#include <MyMath.h>
 
 void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath)
 {
@@ -103,7 +103,7 @@ void Sprite::Update()
 	indexData[3] = 1; indexData[4] = 3; indexData[5] = 2;
 
 	worldMatrix = MyMath::MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
-	projectionMatrix = MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.0f, 100.0f);
+	projectionMatrix = MyMath::MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.0f, 100.0f);
 	worldViewProjectionMatrix = worldMatrix * viewMatrix.MakeIdentity4x4() * projectionMatrix;
 	transformationMatrixData->WVP = worldViewProjectionMatrix;
 	transformationMatrixData->World = worldMatrix;

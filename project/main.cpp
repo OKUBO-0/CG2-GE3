@@ -12,7 +12,6 @@
 #include "Vector2.h"
 #include "Matrix4x4.h"
 #include "MyMath.h"
-#include "RenderingPipeline.h"
 #include "Input.h"
 #include "WinApp.h"
 #include "DirectXCommon.h"
@@ -167,6 +166,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			vertexData[start].texcoord = { float(lonIndex + 1) / float(kSubdivision), 1.0f - float(latIndex + 1) / float(kSubdivision) };
 		}
 	}
+#pragma endregion
+
+
+#pragma region Material用のResourceを作る
+	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource = dxCommon->CreateBufferResource(sizeof(Material));
+	//マテリアルにデータを書き込む	
+	Material* materialDataSphere = nullptr;
+	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSphere));
+	//色
+	materialDataSphere->color = { Vector4(1.0f, 1.0f, 1.0f, 1.0f) };
+	materialDataSphere->enableLighting = true;
+	materialDataSphere->uvTransform = materialDataSphere->uvTransform.MakeIdentity4x4();
 #pragma endregion
 
 
