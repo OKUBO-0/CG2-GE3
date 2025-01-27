@@ -113,4 +113,9 @@ private:
 	Vector2 textureLeftTop_ = { 0.0f,0.0f };
 	//テクスチャ切り出しサイズ
 	Vector2 textureSize_ = { 512.0f,512.0f };
+
+	Matrix4x4 worldMatrix;
+	Matrix4x4 viewMatrix;
+	Matrix4x4 projectionMatrix;
+	Matrix4x4 worldViewProjectionMatrix;
 };

@@ -32,8 +32,8 @@ void Model::Initialize(ModelCommon* modelCommon, const std::string& directorypat
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 	//色
 	materialData->color = { Vector4(1.0f, 1.0f, 1.0f, 1.0f) };
-	materialData->enableLighting = true;//有効にするか否か
-	materialData->uvTransform = MakeIdentity4x4();
+	materialData->enableLighting = false;//有効にするか否か
+	materialData->uvTransform = materialData->uvTransform.MakeIdentity4x4();
 
 	//.objの参照しているテクスチャファイル読み込み
 	TextureManager::GetInstance()->LoadTexture(modelData.material.textureFilePath);

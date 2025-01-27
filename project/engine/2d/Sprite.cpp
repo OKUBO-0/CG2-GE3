@@ -2,6 +2,7 @@
 #include "SpriteCommon.h"
 #include "RenderingPipeline.h"
 #include "TextureManager.h"
+#include "Matrix4x4.h"
 
 void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath)
 {
@@ -36,14 +37,14 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath)
 	//色
 	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	materialData->enableLighting = false;
-	materialData->uvTransform = MakeIdentity4x4();
+	materialData->uvTransform = materialData->uvTransform.MakeIdentity4x4();
 
 	//Transformation
 	//書き込むためのアドレスを取得
 	transformationMatrixResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData));
 	//単位行列を書き込んでおく
-	transformationMatrixData->WVP = MakeIdentity4x4();
-	transformationMatrixData->World = MakeIdentity4x4();
+	transformationMatrixData->WVP = transformationMatrixData->WVP.MakeIdentity4x4();
+	transformationMatrixData->World = transformationMatrixData->World.MakeIdentity4x4();
 
 	//画像のサイズに合わせる
 	AdjustTextureSize();
@@ -101,10 +102,9 @@ void Sprite::Update()
 	indexData[0] = 0; indexData[1] = 1; indexData[2] = 2;
 	indexData[3] = 1; indexData[4] = 3; indexData[5] = 2;
 
-	Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
-	Matrix4x4 viewMatrix = MakeIdentity4x4();
-	Matrix4x4 projectionMatrix = MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.0f, 100.0f);
-	Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
+	worldMatrix = MyMath::MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+	projectionMatrix = MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::kClientWidth), float(WinApp::kClientHeight), 0.0f, 100.0f);
+	worldViewProjectionMatrix = worldMatrix * viewMatrix.MakeIdentity4x4() * projectionMatrix;
 	transformationMatrixData->WVP = worldViewProjectionMatrix;
 	transformationMatrixData->World = worldMatrix;
 }
