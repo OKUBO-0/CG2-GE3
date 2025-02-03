@@ -17,11 +17,12 @@ public:
 
 	// シングルトンインスタンスの取得
 	static ModelManager* GetInstants();
+
 	// 終了
 	void Finalize();
 
 	// 初期化
-	void Initialize(DirectXCommon* dxcommon);
+	void Initialize(DirectXCommon* dxcommon, SrvManager* srvmanager);
 
 	// モデルの読み込み
 	void LoadModel(const std::string& filePath);
@@ -34,4 +35,5 @@ private:
 	//モデルデータ
 	std::map<std::string, std::unique_ptr < Model>> models;
 	ModelCommon* modelCommon = nullptr;
+	SrvManager* srvmanager_ = nullptr;
 };

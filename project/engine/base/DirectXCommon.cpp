@@ -241,7 +241,7 @@ void DirectXCommon::DxcCompilerInitialize()
 void DirectXCommon::ImguiInitialize()
 {
 	//ImGui初期化
-	IMGUI_CHECKVERSION();
+	/*IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
 	ImGui_ImplWin32_Init(winApp_->GetHwnd());
@@ -250,7 +250,7 @@ void DirectXCommon::ImguiInitialize()
 		rtvDesc.Format,
 		srvDescriptorHeap.Get(),
 		srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-		srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+		srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());*/
 }
 
 
@@ -301,9 +301,6 @@ void DirectXCommon::Begin()
 	//指定した色で画面全体をクリアする
 	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };//青っぽい色。RGBAの順
 	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
-	//描画用のDescript
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeaps[] = { srvDescriptorHeap };
-	commandList->SetDescriptorHeaps(1, descriptorHeaps->GetAddressOf());
 	//コマンドリストの内容を確定させる。すべてのコマンドを積んでからCloseすること
 	commandList->RSSetViewports(1, &viewport);
 	commandList->RSSetScissorRects(1, &scissorRect);
@@ -560,8 +557,8 @@ void DirectXCommon::CommandKick()
 	fenceValue++;
 	//GPUがここまでたどりついた時に、Fenceの値を指定したあたいに代入するようにsignalを送る
 	commandQueue->Signal(fence.Get(), fenceValue);
-	//Femceの値が指定したSignal値にたどり着いているか確認する
-		//GetCompletebValuの初期値はFence作成時に渡した初期値
+	//Fenceの値が指定したSignal値にたどり着いているか確認する
+		//GetCompletebValueの初期値はFence作成時に渡した初期値
 	if (fence->GetCompletedValue() < fenceValue) {
 		//指定したSignalにたどりついていないので、たどり着くまで待つようにイベントを設定する
 		fence->SetEventOnCompletion(fenceValue, fenceEvent);

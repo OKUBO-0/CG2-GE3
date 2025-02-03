@@ -80,6 +80,11 @@ public:
 		// compilerに使用するProfile
 		const wchar_t* profile);
 
+	// デスクリプタヒープを生成する
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>
+		CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heaptype,
+			UINT numDescriptrs, bool shaderVisible);
+
 	// バッファーリソースの生成
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(size_t sizeInBytes);
 
@@ -155,10 +160,6 @@ private:
 
 
 private:
-	// デスクリプタヒープを生成する
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>
-		CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heaptype,
-			UINT numDescriptrs, bool shaderVisible);
 
 	// FPS固定初期化
 	void InitializeFixFPS();

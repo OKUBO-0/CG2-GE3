@@ -99,7 +99,7 @@ void SpriteCommon::GraphicsPipelineInitialize()
 	D3D12_BLEND_DESC blendDesc{};
 	//すべての色素要素を書き込む
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-	//RasiterzerStateの設定
+	//RasterizerStateの設定
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
 	//裏面（時計回り）を表示しない
 	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
@@ -114,7 +114,7 @@ void SpriteCommon::GraphicsPipelineInitialize()
 	assert(pixelShaderBlob != nullptr);
 	//DepthStencilStateの設定
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
-	//Deothの機能を有効化する
+	//Depthの機能を有効化する
 	depthStencilDesc.DepthEnable = true;
 	//書き込みします
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;

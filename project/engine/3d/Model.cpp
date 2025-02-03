@@ -1,8 +1,9 @@
 #include "Model.h"
-#include "TextureManager.h"
 #include <fstream>
 #include <sstream>
 #include <assert.h>
+#include "TextureManager.h"
+#include "SrvManager.h"
 
 void Model::Initialize(ModelCommon* modelCommon, const std::string& directorypath, const std::string& filename)
 {
@@ -48,7 +49,7 @@ void Model::Draw()
 	//マテリアルのCBufferの場所を設定
 	modelCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 	//SRVのDescriptorTableの先頭を設定
-	modelCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelData.material.textureIndex));
+	modelCommon_->GetSRVManager()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetTextureIndexByFilePath(modelData.material.textureFilePath));
 	//描画！
 	modelCommon_->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 }

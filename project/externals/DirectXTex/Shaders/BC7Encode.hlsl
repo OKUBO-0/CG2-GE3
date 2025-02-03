@@ -243,7 +243,7 @@ void Ensure_A_Is_Larger(inout uint4 a, inout uint4 b)
 
 
 Texture2D g_Input : register(t0);
-StructuredBuffer<uint4> g_InBuff : register(t1);
+Buffer<uint4> g_InBuff : register(t1);
 
 RWStructuredBuffer<uint4> g_OutBuff : register(u0);
 

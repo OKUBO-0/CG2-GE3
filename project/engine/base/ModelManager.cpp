@@ -18,10 +18,11 @@ void ModelManager::Finalize()
 }
 
 
-void ModelManager::Initialize(DirectXCommon* dxcommon)
+void ModelManager::Initialize(DirectXCommon* dxcommon, SrvManager* srvmnager)
 {
+	srvmanager_ = srvmnager;
 	modelCommon = new ModelCommon;
-	modelCommon->Initialize(dxcommon);
+	modelCommon->Initialize(dxcommon, srvmanager_);
 }
 
 
