@@ -47,6 +47,8 @@ public:
 	// デストラクタ
 	~DirectXCommon();
 
+	void FinalizeImGui();
+
 
 	//SRVの指定番号のCPUデスクリプタハンドルを取得
 	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUDescriptorHandle(uint32_t index);
@@ -78,7 +80,7 @@ public:
 	ID3D12GraphicsCommandList* GetCommandList()const { return commandList.Get(); }
 
 	//CompileShader関数の作成
-	IDxcBlob* CompileShader(
+	Microsoft::WRL::ComPtr<IDxcBlob> CompileShader(
 		//CompilerするShaderファイルへのパス
 		const std::wstring& filePath,
 		//compilerに使用するProfile
