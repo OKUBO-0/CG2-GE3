@@ -814,7 +814,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #ifdef _DEBUG
 #endif //_DEBUG
 #pragma endregion
-
+	dxCommon->Finalize();
 	// 終了処理
 	winApp->Finalize();
 	// 解放処理
