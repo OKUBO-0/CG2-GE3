@@ -815,8 +815,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 
-	/*CloseHandle(fenceEvent);*/
-
 #ifdef _DEBUG
 #endif //_DEBUG
 #pragma endregion

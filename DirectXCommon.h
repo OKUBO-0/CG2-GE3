@@ -41,6 +41,12 @@ public:
 	//描画後処理
 	void End();
 
+	// 終了処理
+	void Finalize();
+
+	// デストラクタ
+	~DirectXCommon();
+
 
 	//SRVの指定番号のCPUデスクリプタハンドルを取得
 	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUDescriptorHandle(uint32_t index);
@@ -139,9 +145,9 @@ private:
 	D3D12_RECT scissorRect{};
 
 	//DXC
-	IDxcUtils* dxcUtils = nullptr;
-	IDxcCompiler3* dxcCompiler = nullptr;
-	IDxcIncludeHandler* includeHandler = nullptr;
+	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
+	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler = nullptr;
+	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler = nullptr;
 
 	//barrier
 	D3D12_RESOURCE_BARRIER barrier{};

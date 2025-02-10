@@ -225,13 +225,16 @@ void DirectXCommon::ScissorInitialize()
 void DirectXCommon::DxcCompilerInitialize()
 {
 #pragma region DxcCompiler
-	//dicCompilerを初期化
+	// 1. DXC Utils を作成
 	hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils));
 	assert(SUCCEEDED(hr));
+
+	// 2. DXC Compiler を作成
 	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler));
 	assert(SUCCEEDED(hr));
-	//includeに対する設定
-	hr = dxcUtils->CreateDefaultIncludeHandler(&includeHandler);
+
+	// 3. Include Handler を作成
+	hr = dxcUtils->CreateDefaultIncludeHandler(includeHandler.GetAddressOf());
 	assert(SUCCEEDED(hr));
 #pragma endregion
 }
@@ -449,7 +452,7 @@ IDxcBlob* DirectXCommon::CompileShader(const std::wstring& filePath, const wchar
 		&shaderSourceBuffer,//読み込んだファイル
 		arguments,			//コンパイルオプション
 		_countof(arguments),//コンパイルオプションの数
-		includeHandler,		//includeが含まれた
+		includeHandler.Get(),//includeが含まれた
 		IID_PPV_ARGS(&shaderResult)//コンパイル結果
 	);
 	//コンパイルエラーではなくDXCが起動できない致命的な状況
@@ -560,4 +563,19 @@ DirectX::ScratchImage DirectXCommon::LoadTexture(const std::string& filePath)
 	assert(SUCCEEDED(hr));
 	//ミニマップ着きのデータを返す
 	return mipImages;
+}
+
+void DirectXCommon::Finalize()
+{
+	// FenceEvent の開放
+	if (fenceEvent) {
+		CloseHandle(fenceEvent);
+		fenceEvent = nullptr;
+	}
+}
+
+DirectXCommon::~DirectXCommon()
+{
+	// デストラクタでも開放（念のため）
+	Finalize();
 }
